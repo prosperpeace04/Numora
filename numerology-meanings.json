@@ -1,0 +1,108 @@
+{
+  "lifePath": {
+    "1": { "title": "The Leader", "summary": "Independence, leadership, originality. Natural initiator who turns ideas into reality through willpower and self-direction." },
+    "2": { "title": "The Diplomat", "summary": "Cooperation, diplomacy, sensitivity. Thrives on partnership, harmony, and reading what others need." },
+    "3": { "title": "The Communicator", "summary": "Creativity, self-expression, social skill. Translates feelings into words, art, or performance; prone to scattered energy if unfocused." },
+    "4": { "title": "The Builder", "summary": "Stability, organization, practicality. Builds things that last through steady, methodical work; shows care through action." },
+    "5": { "title": "The Adventurer", "summary": "Freedom, adventure, adaptability. Craves variety and change; life purpose often involves full experience and inspiring others through it." },
+    "6": { "title": "The Nurturer", "summary": "Responsibility, nurturing, harmony. Natural caregiver drawn to family, community, and restoring balance." },
+    "7": { "title": "The Seeker", "summary": "Analysis, introspection, spirituality. Analytical mind drawn to research, solitude, and deeper truth." },
+    "8": { "title": "The Powerhouse", "summary": "Ambition, authority, material success. Driven toward achievement, business, and tangible results." },
+    "9": { "title": "The Humanitarian", "summary": "Compassion, wisdom, humanitarianism. Oriented toward service to others and the collective good." },
+    "11": { "title": "The Intuitive (Master Number)", "summary": "Heightened idealism, intuition, and sensitivity. Not reduced further; carries the themes of 2 at a more intense, spiritually-charged level." },
+    "22": { "title": "The Master Builder (Master Number)", "summary": "Large-scale vision paired with practical execution. Carries the themes of 4 at a more intense level, able to turn big ideas into lasting structures." },
+    "33": { "title": "The Master Teacher (Master Number)", "summary": "Selfless service and compassion at a heightened level. Carries the themes of 6, focused on healing and uplifting others." }
+  },
+  "expression": {
+    "1": { "summary": "Natural talent for leadership and forging an independent path." },
+    "2": { "summary": "Gift for mediation, partnership, and organisational, behind-the-scenes work." },
+    "3": { "summary": "Creative, artistic talent and a natural ability for self-expression." },
+    "4": { "summary": "Practical, down-to-earth ability to build and organise." },
+    "5": { "summary": "Versatile talent suited to variety, travel, and adaptability." },
+    "6": { "summary": "Natural ability in caregiving, teaching, or community-oriented roles." },
+    "7": { "summary": "Talent for research, analysis, and specialised or spiritual knowledge." },
+    "8": { "summary": "Natural capability for business, authority, and material achievement." },
+    "9": { "summary": "Talent expressed through service, art, or humanitarian work on a broad scale." }
+  },
+  "soulUrge": {
+    "1": { "summary": "A desire for independence, leadership, and autonomy." },
+    "2": { "summary": "A deep longing for harmony, peace, and close relationships." },
+    "3": { "summary": "A need for self-expression, creativity, and joy." },
+    "4": { "summary": "A strong desire for security, stability, and hard work." },
+    "5": { "summary": "A yearning for freedom, change, and excitement." },
+    "6": { "summary": "A need to nurture others and focus on family and home life." },
+    "7": { "summary": "A deep inner need for solitude, reflection, and spiritual growth." },
+    "8": { "summary": "A desire for material success, ambition, and leadership." },
+    "9": { "summary": "A longing to help others, serve humanity, and bring about positive change." }
+  },
+  "personality": {
+    "1": { "summary": "Comes across as confident, direct, and self-assured." },
+    "2": { "summary": "Comes across as gentle, diplomatic, and easy to approach." },
+    "3": { "summary": "Comes across as expressive, sociable, and good-humoured." },
+    "4": { "summary": "Comes across as grounded, reliable, and disciplined." },
+    "5": { "summary": "Comes across as energetic, adaptable, and magnetic." },
+    "6": { "summary": "Comes across as warm, responsible, and caring." },
+    "7": { "summary": "Comes across as reserved, thoughtful, and perceptive." },
+    "8": { "summary": "Comes across as authoritative, ambitious, and capable." },
+    "9": { "summary": "Comes across as compassionate, broad-minded, and idealistic." },
+    "11": { "summary": "Comes across as intense, perceptive, and quietly magnetic (master number, not reduced)." }
+  },
+  "lifePathDetail": {
+    "1": { "strengths": ["Innovator", "Lionhearted", "Ingenious", "Inspired", "Committed"], "weaknesses": ["Desirous", "Unforgiving", "Authoritative", "Contentious", "Confrontational"], "careerForecast": "Business owners, managers, supervisors, executives, team leaders." },
+    "2": { "strengths": ["Amicable", "Instinctual", "Caring", "Reassuring", "Compassionate"], "weaknesses": ["Mercurial", "Oversensitive", "Unforthcoming", "Envious", "Ambivalent"], "careerForecast": "Counselors, mediators, negotiators, therapists." },
+    "3": { "strengths": ["Entertaining", "Visionary", "Innovative", "Amiable", "Charming"], "weaknesses": ["Scattered", "Condemning", "Extravagant", "Needy", "Muckrake"], "careerForecast": "Artists, actors, entertainers." },
+    "4": { "strengths": ["Diligent", "Efficient", "Grounded", "Accountable", "Attentive"], "weaknesses": ["Stubborn", "Bigoted", "Obstinate", "Intolerant", "Gloomy"], "careerForecast": "CEOs, managers, accountants, auditors, editors, surveyors, analysts." },
+    "5": { "strengths": ["Ingenious", "Gifted", "Connector", "Versatile", "Fascinating"], "weaknesses": ["Compulsive", "Sensational", "Unforgiving", "Distracted", "Inconsistent"], "careerForecast": "Salespeople, advisors, consultants, project managers, event planners, promoters, publicists." },
+    "6": { "strengths": ["Cultivative", "Reassuring", "Commiserating", "Compassionate", "Dependable"], "weaknesses": ["Domineering", "Condemnatory", "Meddlesome", "Sanctimonious", "Purist"], "careerForecast": "Teachers, counselors, therapists." },
+    "7": { "strengths": ["Clever", "Scientific", "Scrutinizing", "Instinctive", "Systematic"], "weaknesses": ["Liberal", "Taciturn", "Despondent", "Pessimistic", "Doubtful"], "careerForecast": "Psychiatrists, psychologists, counselors, therapists." },
+    "8": { "strengths": ["Methodical", "Stimulate", "Motivated", "Powerful", "Studious"], "weaknesses": ["Masterful", "Wealthy", "Threatening", "Shallow", "Scheming"], "careerForecast": "Business owners, CEOs, supervisors, managers." },
+    "9": { "strengths": ["Pitying", "Magnanimous", "Intense", "Indulgent", "Encouraging"], "weaknesses": ["Merciless", "Vindictive", "Protective", "Exaggerated", "Hostile"], "careerForecast": "Teachers, counselors, therapists." },
+    "11": { "strengths": ["Natural", "Freethinking", "Creative", "Profound", "Negotiator"], "weaknesses": ["Timorous", "Cunning", "Profound", "Self-deceptive", "Vulnerable"], "careerForecast": "Counselors, therapists." },
+    "22": { "strengths": ["Far-sighted", "Dynamic", "Loyal", "Engrossed", "Quixotic"], "weaknesses": ["Immovable", "Plodding", "Headstrong", "Hegemonic", "Idealist"], "careerForecast": "Business owners, CEOs, managers." },
+    "33": { "strengths": ["Artistic", "Healthful", "Gentle", "Affectionate", "Nourishing"], "weaknesses": ["Precisionist", "Consummate", "Scathing", "Sanctimonious", "Analytical"], "careerForecast": "Counselors, therapists, health professionals." }
+  },
+  "compatibilityGroups": {
+    "note": "Basic grouping heuristic (not a precise science) used by the Compatibility feature: same group = harmonious, different group = neutral, identical Life Path = strong-match.",
+    "groups": [[1, 5, 7], [2, 4, 8], [3, 6, 9]]
+  },
+  "chaldeanSystem": {
+    "note": "Older numerology system, does not use the number 9 in its letter mapping. Offered as an alternative to Pythagorean via a system toggle.",
+    "letterMap": {
+      "1": ["a", "i", "j", "q"],
+      "2": ["b", "k", "r", "y"],
+      "3": ["c", "g", "l", "s"],
+      "4": ["d", "m", "t"],
+      "5": ["e", "h", "n", "x"],
+      "6": ["u", "v", "w"],
+      "7": ["o", "z"],
+      "8": ["f", "p"]
+    }
+  },
+  "rootNumberLookup": {
+    "1": { "keyword": "Beginnings", "summary": "Independence, leadership, originality, new starts." },
+    "2": { "keyword": "Balance", "summary": "Cooperation, diplomacy, partnership, sensitivity." },
+    "3": { "keyword": "Expression", "summary": "Creativity, communication, self-expression, joy." },
+    "4": { "keyword": "Structure", "summary": "Stability, organisation, practicality, hard work." },
+    "5": { "keyword": "Change", "summary": "Freedom, adventure, adaptability, variety." },
+    "6": { "keyword": "Care", "summary": "Responsibility, nurturing, harmony, family." },
+    "7": { "keyword": "Reflection", "summary": "Analysis, introspection, spirituality, solitude." },
+    "8": { "keyword": "Power", "summary": "Ambition, authority, material success, achievement." },
+    "9": { "keyword": "Completion", "summary": "Compassion, wisdom, humanitarianism, release." }
+  },
+  "personalDay": {
+    "1": { "keyword": "Start", "summary": "Best for initiating, deciding, or leading. Act first, ask later." },
+    "2": { "keyword": "Cooperate", "summary": "Favors patience, listening, and working alongside others rather than solo pushes." },
+    "3": { "keyword": "Express", "summary": "Good day to speak up, write, create, or share an idea you've been sitting on." },
+    "4": { "keyword": "Build", "summary": "Structure, discipline, and finishing tasks that need steady, unglamorous work." },
+    "5": { "keyword": "Shift", "summary": "Expect or welcome change. Good for variety, travel, or breaking routine." },
+    "6": { "keyword": "Care", "summary": "Responsibility and obligations take priority. Good for fixing what's broken." },
+    "7": { "keyword": "Reflect", "summary": "Favors solitude, study, and thinking things through before acting." },
+    "8": { "keyword": "Push", "summary": "Ambition and authority are favored. Good for money, business, or bold moves." },
+    "9": { "keyword": "Release", "summary": "Closing loops, letting go, tying up loose ends before starting something new." }
+  },
+  "sources": [
+    "Cross-checked against multiple independent numerology reference sites (life path, expression/destiny, soul urge, personality number definitions and 1-9 + master number meanings) for consistency before compiling.",
+    "lifePathDetail (strengths/weaknesses/careerForecast), compatibilityGroups, and chaldeanSystem sourced from the user-provided Numerology Name Calculator Handbook (Buchanan, Michelle, 'Numerology Made Easy', Hay House Inc., ISBN 978-1-78817-258-5, cited in that handbook's references).",
+    "This content is a symbolic/interpretive framework with no scientific or predictive basis. Recommend a disclaimer footer in the app stating this is for reflection/entertainment."
+  ]
+}
