@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Numora</title>
+<style>
+  @media (prefers-color-scheme: dark) {
+    body { background: #000; color: #F5F5F5; }
+  }
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: sans-serif;
+    background: #fff;
+    color: #171717;
+  }
+</style>
+</head>
+<body>
+  <div>Loading…</div>
+
+<script type="module">
+  import { auth } from '/src/auth-client.js';
+
+  // If the user is already signed in, send them straight to the dashboard.
+  // Otherwise send them to sign up / sign in. This is the only job this
+  // page has, it's not meant to be seen for more than a moment.
+  const { data } = await auth.token();
+  window.location.href = data?.token ? '/numora-dashboard.html' : '/auth.html';
+</script>
+</body>
+</html>

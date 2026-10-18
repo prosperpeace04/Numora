@@ -6,6 +6,7 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       input: {
+        main: resolve(__dirname, 'index.html'),
         auth: resolve(__dirname, 'auth.html'),
         dashboard: resolve(__dirname, 'numora-dashboard.html'),
       },

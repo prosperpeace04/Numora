@@ -91,6 +91,8 @@
     margin-bottom: 12px;
   }
   .row { display:flex; justify-content:space-between; align-items:center; }
+  .card.row.tappable { cursor: pointer; transition: background 0.15s; }
+  .card.row.tappable:hover { background: rgba(0,0,0,0.02); }
   .num-label { font-size: 13px; color: var(--muted); }
   .num-value { font-size: 26px; font-weight:700; color: var(--brand); }
 
@@ -211,11 +213,11 @@
     <div class="subtext">Calculated from your birthdate and name</div>
     <div id="profile-loading" class="subtext">Loading your numbers…</div>
     <div id="profile-cards" style="display:none;">
-      <div class="card row"><span class="num-label">Life Path</span><span class="num-value" id="pv-lifepath">—</span></div>
-      <div class="card row"><span class="num-label">Expression</span><span class="num-value" id="pv-expression">—</span></div>
-      <div class="card row"><span class="num-label">Soul Urge</span><span class="num-value" id="pv-soulurge">—</span></div>
-      <div class="card row"><span class="num-label">Personality</span><span class="num-value" id="pv-personality">—</span></div>
-      <div class="card row"><span class="num-label">Personal Year</span><span class="num-value" id="pv-personalyear">—</span></div>
+      <div class="card row tappable" onclick="openNumberModal('lifePath')"><span class="num-label">Life Path</span><span class="num-value" id="pv-lifepath">—</span></div>
+      <div class="card row tappable" onclick="openNumberModal('expression')"><span class="num-label">Expression</span><span class="num-value" id="pv-expression">—</span></div>
+      <div class="card row tappable" onclick="openNumberModal('soulUrge')"><span class="num-label">Soul Urge</span><span class="num-value" id="pv-soulurge">—</span></div>
+      <div class="card row tappable" onclick="openNumberModal('personality')"><span class="num-label">Personality</span><span class="num-value" id="pv-personality">—</span></div>
+      <div class="card row tappable" onclick="openNumberModal('personalYear')"><span class="num-label">Personal Year</span><span class="num-value" id="pv-personalyear">—</span></div>
     </div>
     <button class="link-btn" style="margin-top:14px;" onclick="openCompat()">Check Compatibility with Someone →</button>
   </div>
@@ -289,6 +291,19 @@
   </div>
 
   <!-- Compatibility modal -->
+  <!-- Number explanation modal (Profile taps + Lookup) -->
+  <div class="overlay" id="numinfo-overlay" onclick="if(event.target===this) closeNumberModal()">
+    <div class="modal">
+      <h2 id="numinfo-title"></h2>
+      <div class="subtext" id="numinfo-subtitle" style="margin-bottom:14px;"></div>
+      <div id="numinfo-summary" style="font-size:14px; line-height:1.6; margin-bottom:14px;"></div>
+      <div id="numinfo-strengths" style="margin-bottom:10px;"></div>
+      <div id="numinfo-weaknesses" style="margin-bottom:10px;"></div>
+      <div id="numinfo-career" class="subtext"></div>
+      <button class="close-btn" onclick="closeNumberModal()">Close</button>
+    </div>
+  </div>
+
   <div class="overlay" id="compat-overlay" onclick="if(event.target===this) closeCompat()">
     <div class="modal">
       <h2>Compatibility</h2>
@@ -348,6 +363,72 @@
 
   function openCompat() { document.getElementById('compat-overlay').classList.add('open'); }
   function closeCompat() { document.getElementById('compat-overlay').classList.remove('open'); }
+
+  // Content sourced from numerology-meanings.json (cross-checked against
+  // multiple numerology references; lifePathDetail/root content additionally
+  // sourced from the user-provided Numerology Name Calculator Handbook).
+  const LIFE_PATH = {
+    1: { title: "The Leader", summary: "Independence, leadership, originality. Natural initiator who turns ideas into reality through willpower and self-direction.", strengths: ["Innovator","Lionhearted","Ingenious","Inspired","Committed"], weaknesses: ["Desirous","Unforgiving","Authoritative","Contentious","Confrontational"], career: "Business owners, managers, supervisors, executives, team leaders." },
+    2: { title: "The Diplomat", summary: "Cooperation, diplomacy, sensitivity. Thrives on partnership, harmony, and reading what others need.", strengths: ["Amicable","Instinctual","Caring","Reassuring","Compassionate"], weaknesses: ["Mercurial","Oversensitive","Unforthcoming","Envious","Ambivalent"], career: "Counselors, mediators, negotiators, therapists." },
+    3: { title: "The Communicator", summary: "Creativity, self-expression, social skill. Translates feelings into words, art, or performance.", strengths: ["Entertaining","Visionary","Innovative","Amiable","Charming"], weaknesses: ["Scattered","Condemning","Extravagant","Needy","Muckrake"], career: "Artists, actors, entertainers." },
+    4: { title: "The Builder", summary: "Stability, organization, practicality. Builds things that last through steady, methodical work.", strengths: ["Diligent","Efficient","Grounded","Accountable","Attentive"], weaknesses: ["Stubborn","Bigoted","Obstinate","Intolerant","Gloomy"], career: "CEOs, managers, accountants, auditors, editors, surveyors, analysts." },
+    5: { title: "The Adventurer", summary: "Freedom, adventure, adaptability. Craves variety and full experience.", strengths: ["Ingenious","Gifted","Connector","Versatile","Fascinating"], weaknesses: ["Compulsive","Sensational","Unforgiving","Distracted","Inconsistent"], career: "Salespeople, advisors, consultants, project managers, event planners." },
+    6: { title: "The Nurturer", summary: "Responsibility, nurturing, harmony. Natural caregiver drawn to family and community.", strengths: ["Cultivative","Reassuring","Commiserating","Compassionate","Dependable"], weaknesses: ["Domineering","Condemnatory","Meddlesome","Sanctimonious","Purist"], career: "Teachers, counselors, therapists." },
+    7: { title: "The Seeker", summary: "Analysis, introspection, spirituality. Analytical mind drawn to research, solitude, and deeper truth.", strengths: ["Clever","Scientific","Scrutinizing","Instinctive","Systematic"], weaknesses: ["Liberal","Taciturn","Despondent","Pessimistic","Doubtful"], career: "Psychiatrists, psychologists, counselors, therapists." },
+    8: { title: "The Powerhouse", summary: "Ambition, authority, material success. Driven toward achievement and tangible results.", strengths: ["Methodical","Stimulate","Motivated","Powerful","Studious"], weaknesses: ["Masterful","Wealthy","Threatening","Shallow","Scheming"], career: "Business owners, CEOs, supervisors, managers." },
+    9: { title: "The Humanitarian", summary: "Compassion, wisdom, humanitarianism. Oriented toward service to others and the collective good.", strengths: ["Pitying","Magnanimous","Intense","Indulgent","Encouraging"], weaknesses: ["Merciless","Vindictive","Protective","Exaggerated","Hostile"], career: "Teachers, counselors, therapists." },
+    11: { title: "The Intuitive (Master Number)", summary: "Heightened idealism, intuition, and sensitivity. A more intense version of 2's themes, not reduced further.", strengths: ["Natural","Freethinking","Creative","Profound","Negotiator"], weaknesses: ["Timorous","Cunning","Self-deceptive","Vulnerable"], career: "Counselors and therapists." },
+    22: { title: "The Master Builder (Master Number)", summary: "Large-scale vision paired with practical execution. A more intense version of 4's themes.", strengths: ["Far-sighted","Dynamic","Loyal","Engrossed"], weaknesses: ["Immovable","Plodding","Headstrong","Hegemonic"], career: "Business owners, CEOs, managers." },
+    33: { title: "The Master Teacher (Master Number)", summary: "Selfless service and compassion at a heightened level. A more intense version of 6's themes.", strengths: ["Artistic","Healthful","Gentle","Affectionate"], weaknesses: ["Precisionist","Scathing","Sanctimonious"], career: "Counselors, therapists, health professionals." },
+  };
+  const EXPRESSION = {1:"Natural talent for leadership and forging an independent path.",2:"Gift for mediation, partnership, and organisational work.",3:"Creative, artistic talent and a natural ability for self-expression.",4:"Practical, down-to-earth ability to build and organise.",5:"Versatile talent suited to variety, travel, and adaptability.",6:"Natural ability in caregiving, teaching, or community-oriented roles.",7:"Talent for research, analysis, and specialised knowledge.",8:"Natural capability for business, authority, and material achievement.",9:"Talent expressed through service, art, or humanitarian work.",11:"Heightened, intuitive version of the Expression 2 talent for partnership."};
+  const SOUL_URGE = {1:"A desire for independence, leadership, and autonomy.",2:"A deep longing for harmony, peace, and close relationships.",3:"A need for self-expression, creativity, and joy.",4:"A strong desire for security, stability, and hard work.",5:"A yearning for freedom, change, and excitement.",6:"A need to nurture others and focus on family and home life.",7:"A deep inner need for solitude, reflection, and spiritual growth.",8:"A desire for material success, ambition, and leadership.",9:"A longing to help others and bring about positive change."};
+  const PERSONALITY = {1:"Comes across as confident, direct, and self-assured.",2:"Comes across as gentle, diplomatic, and easy to approach.",3:"Comes across as expressive, sociable, and good-humoured.",4:"Comes across as grounded, reliable, and disciplined.",5:"Comes across as energetic, adaptable, and magnetic.",6:"Comes across as warm, responsible, and caring.",7:"Comes across as reserved, thoughtful, and perceptive.",8:"Comes across as authoritative, ambitious, and capable.",9:"Comes across as compassionate, broad-minded, and idealistic.",11:"Comes across as intense, perceptive, and quietly magnetic."};
+  const ROOT = {1:{keyword:"Beginnings",summary:"Independence, leadership, originality, new starts."},2:{keyword:"Balance",summary:"Cooperation, diplomacy, partnership, sensitivity."},3:{keyword:"Expression",summary:"Creativity, communication, self-expression, joy."},4:{keyword:"Structure",summary:"Stability, organisation, practicality, hard work."},5:{keyword:"Change",summary:"Freedom, adventure, adaptability, variety."},6:{keyword:"Care",summary:"Responsibility, nurturing, harmony, family."},7:{keyword:"Reflection",summary:"Analysis, introspection, spirituality, solitude."},8:{keyword:"Power",summary:"Ambition, authority, material success, achievement."},9:{keyword:"Completion",summary:"Compassion, wisdom, humanitarianism, release."}};
+
+  function openNumberModal(type) {
+    const idMap = { lifePath: 'pv-lifepath', expression: 'pv-expression', soulUrge: 'pv-soulurge', personality: 'pv-personality', personalYear: 'pv-personalyear' };
+    const num = parseInt(document.getElementById(idMap[type]).textContent, 10);
+    if (!num) return;
+
+    const strengthsEl = document.getElementById('numinfo-strengths');
+    const weaknessesEl = document.getElementById('numinfo-weaknesses');
+    const careerEl = document.getElementById('numinfo-career');
+    strengthsEl.innerHTML = ''; weaknessesEl.innerHTML = ''; careerEl.textContent = '';
+
+    if (type === 'lifePath') {
+      const d = LIFE_PATH[num];
+      document.getElementById('numinfo-title').textContent = 'Life Path ' + num;
+      document.getElementById('numinfo-subtitle').textContent = d.title;
+      document.getElementById('numinfo-summary').textContent = d.summary;
+      strengthsEl.innerHTML = '<strong>Strengths:</strong> ' + d.strengths.join(', ');
+      weaknessesEl.innerHTML = '<strong>Watch for:</strong> ' + d.weaknesses.join(', ');
+      careerEl.textContent = 'Suits: ' + d.career;
+    } else if (type === 'expression') {
+      document.getElementById('numinfo-title').textContent = 'Expression ' + num;
+      document.getElementById('numinfo-subtitle').textContent = 'Your natural talent';
+      document.getElementById('numinfo-summary').textContent = EXPRESSION[num] || '';
+    } else if (type === 'soulUrge') {
+      document.getElementById('numinfo-title').textContent = 'Soul Urge ' + num;
+      document.getElementById('numinfo-subtitle').textContent = 'What motivates you inwardly';
+      document.getElementById('numinfo-summary').textContent = SOUL_URGE[num] || '';
+    } else if (type === 'personality') {
+      document.getElementById('numinfo-title').textContent = 'Personality ' + num;
+      document.getElementById('numinfo-subtitle').textContent = 'How others perceive you';
+      document.getElementById('numinfo-summary').textContent = PERSONALITY[num] || '';
+    } else if (type === 'personalYear') {
+      const d = ROOT[num] || ROOT[reduceTo9(num)];
+      document.getElementById('numinfo-title').textContent = 'Personal Year ' + num;
+      document.getElementById('numinfo-subtitle').textContent = d.keyword;
+      document.getElementById('numinfo-summary').textContent = d.summary;
+    }
+
+    document.getElementById('numinfo-overlay').classList.add('open');
+  }
+  function closeNumberModal() { document.getElementById('numinfo-overlay').classList.remove('open'); }
+
+  // used only as a safety net if a master number ever lands here unreduced
+  function reduceTo9(n) { while (n > 9) n = String(n).split('').reduce((a,b)=>a+parseInt(b,10),0); return n; }
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -512,8 +593,13 @@
     }
 
     const { rootNumber } = await res.json();
+    const info = ROOT[rootNumber];
     resultEl.style.display = 'block';
-    resultEl.innerHTML = `<div class="row"><span class="num-label">Root Number</span><span class="num-value">${rootNumber}</span></div><div class="subtext" style="margin:10px 0 0;">${KEYWORDS[rootNumber]}</div>`;
+    resultEl.innerHTML = `
+      <div class="row"><span class="num-label">Root Number</span><span class="num-value">${rootNumber}</span></div>
+      <div style="font-weight:700; margin-top:10px;">${info.keyword}</div>
+      <div class="subtext" style="margin-top:4px;">${info.summary}</div>
+    `;
   };
 
   window.updateSystem = async function (value) {
