@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap');
+
+:root {
+  --bg: #FFFFFF;
+  --card: #FFFFFF;
+  --text: #171717;
+  --brand: #A65D46;
+  --border: #EAEAEA;
+  --muted: #71717A;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --card: #111111;
+    --text: #F5F5F5;
+    --brand: #C17A60;
+    --border: #292929;
+    --muted: #A1A1AA;
+    color-scheme: dark;
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  padding-top: calc(24px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+.wrap { width: 100%; max-width: 380px; }
+
+.wordmark {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 28px;
+}
+.wordmark span { color: var(--brand); }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+.card.hidden { display: none; }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+.tab {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tab.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+input {
+  width: 100%;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+button.primary {
+  width: 100%;
+  padding: 13px;
+  border-radius: 8px;
+  border: none;
+  background: var(--brand);
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+h2 { font-size: 18px; margin-bottom: 6px; }
+.subtext { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+
+.error {
+  color: #C44;
+  font-size: 13px;
+  margin-top: 10px;
+  min-height: 16px;
+}

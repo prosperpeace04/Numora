@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Numora — Sign In</title>
+<link rel="stylesheet" href="/src/auth-styles.css">
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="wordmark">Num<span>ora</span></div>
+
+    <!-- STEP: auth (sign up / sign in toggle) -->
+    <div class="card" id="step-auth">
+      <div class="tabs">
+        <button class="tab active" id="tab-signup" onclick="setMode('signup')">Sign Up</button>
+        <button class="tab" id="tab-signin" onclick="setMode('signin')">Sign In</button>
+      </div>
+
+      <!-- Sign-up only fields -->
+      <div id="signup-fields">
+        <input type="text" id="su-username" placeholder="Username">
+        <input type="text" id="su-fullname" placeholder="Full name (for your numbers)">
+        <input type="date" id="su-birthdate" placeholder="Birthdate">
+      </div>
+
+      <input type="email" id="auth-email" placeholder="Email">
+      <input type="password" id="auth-password" placeholder="Password">
+
+      <button class="primary" id="auth-submit" onclick="submitAuth()">Create Account</button>
+      <div class="error" id="auth-error"></div>
+    </div>
+
+    <!-- STEP: verify (OTP) -->
+    <div class="card hidden" id="step-verify">
+      <h2>Check your email</h2>
+      <p class="subtext">Enter the 6-digit code we sent you.</p>
+      <input type="text" id="otp-code" placeholder="123456" maxlength="6" inputmode="numeric">
+      <button class="primary" onclick="submitOtp()">Verify</button>
+      <div class="error" id="otp-error"></div>
+    </div>
+  </div>
+
+<script type="module" src="/src/auth-main.js"></script>
+</body>
+</html>
