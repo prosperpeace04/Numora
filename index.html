@@ -29,8 +29,10 @@
   // If the user is already signed in, send them straight to the dashboard.
   // Otherwise send them to sign up / sign in. This is the only job this
   // page has, it's not meant to be seen for more than a moment.
-  const { data } = await auth.token();
-  window.location.href = data?.token ? '/numora-dashboard.html' : '/auth.html';
+  (async () => {
+    const { data } = await auth.token();
+    window.location.href = data?.token ? '/numora-dashboard.html' : '/auth.html';
+  })();
 </script>
 </body>
 </html>
