@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Numora — Sign In</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#A65D46">
 <link rel="stylesheet" href="/src/auth-styles.css">
 </head>
 <body>
@@ -42,6 +44,21 @@
     </div>
   </div>
 
+<script>
+  // Apply any admin-edited colors on top of the defaults in auth-styles.css.
+  // Note: only applies the set matching the CURRENT mode at load time —
+  // switching light/dark after load still uses the CSS defaults until the
+  // page is reloaded, a known simplification for the MVP.
+  fetch('/api/admin/config').then(r => r.ok ? r.json() : null).then(config => {
+    if (!config) return;
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+      || (!document.documentElement.hasAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const suffix = isDark ? '_dark' : '_light';
+    ['brand', 'bg', 'card', 'text', 'border'].forEach(k => {
+      if (config[k + suffix]) document.documentElement.style.setProperty('--' + k, config[k + suffix]);
+    });
+  }).catch(() => {});
+</script>
 <script type="module" src="/src/auth-main.js"></script>
 </body>
 </html>

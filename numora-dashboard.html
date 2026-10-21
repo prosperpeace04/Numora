@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Numora</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#A65D46">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap');
 
@@ -277,7 +279,13 @@
         <option value="chaldean">Chaldean</option>
       </select>
     </div>
-    <div class="card row"><span class="num-label">Monthly notifications</span><span>On</span></div>
+    <div class="card row">
+      <span class="num-label">Monthly notifications</span>
+      <select id="push-select" onchange="updatePush(this.value)">
+        <option value="off">Off</option>
+        <option value="on">On</option>
+      </select>
+    </div>
   </div>
 
   <!-- Day detail modal -->
@@ -431,7 +439,22 @@
   function reduceTo9(n) { while (n > 9) n = String(n).split('').reduce((a,b)=>a+parseInt(b,10),0); return n; }
 </script>
 
+<script>
+  // Apply any admin-edited colors on top of the defaults (same approach,
+  // same known limitation, as auth.html — see the comment there).
+  fetch('/api/admin/config').then(r => r.ok ? r.json() : null).then(config => {
+    if (!config) return;
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+      || (!document.documentElement.hasAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const suffix = isDark ? '_dark' : '_light';
+    ['brand', 'bg', 'card', 'text', 'border'].forEach(k => {
+      if (config[k + suffix]) document.documentElement.style.setProperty('--' + k, config[k + suffix]);
+    });
+  }).catch(() => {});
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 
 <script type="module">
   import { auth } from '/src/auth-client.js';
@@ -460,9 +483,10 @@
       document.getElementById('profile-loading').textContent = 'Could not load your numbers.';
       return;
     }
-    const { numbers, birthdate, numerologySystem } = await res.json();
+    const { numbers, birthdate, numerologySystem, pushOptIn } = await res.json();
     myBirthdate = birthdate;
     document.getElementById('system-select').value = numerologySystem || 'pythagorean';
+    document.getElementById('push-select').value = pushOptIn ? 'on' : 'off';
     document.getElementById('pv-lifepath').textContent = numbers.lifePath;
     document.getElementById('pv-expression').textContent = numbers.expression ?? '—';
     document.getElementById('pv-soulurge').textContent = numbers.soulUrge ?? '—';
@@ -661,8 +685,49 @@
     }
   });
 
+  // Decodes a JWT's payload without verifying it (verification is the
+  // server's job) — just to read the user id for OneSignal.login().
+  function decodeJwtPayload(token) {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(base64));
+  }
+
+  async function setupPush() {
+    if (typeof OneSignal === 'undefined') return;
+    try {
+      await OneSignal.init({
+        appId: import.meta.env.VITE_ONESIGNAL_APP_ID,
+        serviceWorkerPath: '/OneSignalSDKWorker.js',
+      });
+      const { data } = await auth.token();
+      if (data?.token) {
+        const payload = decodeJwtPayload(data.token);
+        await OneSignal.login(payload.sub);
+      }
+    } catch (err) {
+      console.error('OneSignal setup error:', err);
+    }
+  }
+
+  window.updatePush = async function (value) {
+    const wantsOn = value === 'on';
+    if (wantsOn && typeof OneSignal !== 'undefined') {
+      try {
+        await OneSignal.Notifications.requestPermission();
+      } catch (err) {
+        console.error('Push permission error:', err);
+      }
+    }
+    await authedFetch('/api/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pushOptIn: wantsOn }),
+    });
+  };
+
   loadProfile();
   loadProfilePicture();
+  setupPush();
 </script>
 
 </body>
