@@ -40,8 +40,16 @@
   // Otherwise send them to sign up / sign in. This is the only job this
   // page has, it's not meant to be seen for more than a moment.
   (async () => {
-    const { data } = await auth.token();
-    window.location.href = data?.token ? '/numora-dashboard.html' : '/auth.html';
+    try {
+      const { data } = await auth.token();
+      window.location.href = data?.token ? '/numora-dashboard.html' : '/auth.html';
+    } catch (err) {
+      // auth.token() throws (rather than returning null data) when there's
+      // no signed-in session — which is the normal case for a new visitor.
+      // That was going uncaught before, crashing this page for anyone not
+      // already logged in. Catch it and just send them to sign up/in.
+      window.location.href = '/auth.html';
+    }
   })();
 </script>
 </body>
