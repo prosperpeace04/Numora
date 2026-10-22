@@ -25,6 +25,14 @@
 <body>
   <div>Loading…</div>
 
+<script>
+  // Register the service worker unconditionally, on every page, regardless
+  // of login state — this is what makes the browser offer "Install app" /
+  // "Add to Home screen" at all.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch((err) => console.error('SW registration failed:', err));
+  }
+</script>
 <script type="module">
   import { auth } from '/src/auth-client.js';
 

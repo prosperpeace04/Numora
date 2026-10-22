@@ -453,6 +453,14 @@
   }).catch(() => {});
 </script>
 
+<script>
+  // Independent of OneSignal's own registration below — guarantees PWA
+  // installability even if push setup fails for any reason.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch((err) => console.error('SW registration failed:', err));
+  }
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 
@@ -697,7 +705,7 @@
     try {
       await OneSignal.init({
         appId: import.meta.env.VITE_ONESIGNAL_APP_ID,
-        serviceWorkerPath: '/OneSignalSDKWorker.js',
+        serviceWorkerPath: '/sw.js', // combined worker, also registered independently for PWA installability — see public/sw.js
       });
       const { data } = await auth.token();
       if (data?.token) {
