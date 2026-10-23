@@ -81,9 +81,16 @@
 
   async function login() {
     const pw = document.getElementById('pw-input').value;
-    const res = await fetch('/api/admin/stats', { headers: { 'X-Admin-Password': pw } });
+    let res;
+    try {
+      res = await fetch('/api/admin/stats', { headers: { 'X-Admin-Password': pw } });
+    } catch (err) {
+      document.getElementById('gate-error').textContent = 'Network error: ' + err.message;
+      return;
+    }
     if (!res.ok) {
-      document.getElementById('gate-error').textContent = 'Wrong password.';
+      const body = await res.text();
+      document.getElementById('gate-error').textContent = `Error ${res.status}: ${body}`;
       return;
     }
     adminPassword = pw;
