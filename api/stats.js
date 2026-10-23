@@ -1,5 +1,5 @@
-import { verifyAdmin } from '../_lib/admin-auth.js';
-import { sql } from '../_lib/db.js';
+import { verifyAdmin } from './_lib/admin-auth.js';
+import { sql } from './_lib/db.js';
 
 // GET /api/admin/stats
 // Header: X-Admin-Password

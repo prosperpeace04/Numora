@@ -1,5 +1,5 @@
-import { verifyAdmin } from '../_lib/admin-auth.js';
-import { sql } from '../_lib/db.js';
+import { verifyAdmin } from './_lib/admin-auth.js';
+import { sql } from './_lib/db.js';
 
 // GET   /api/admin/config  -> public, returns all key/value pairs (the
 //        live app calls this on load to apply admin-edited colors)
