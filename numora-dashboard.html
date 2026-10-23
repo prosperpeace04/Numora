@@ -286,6 +286,7 @@
         <option value="on">On</option>
       </select>
     </div>
+    <button class="action" style="margin-top:4px;" onclick="logout()">Log Out</button>
   </div>
 
   <!-- Day detail modal -->
@@ -731,6 +732,15 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pushOptIn: wantsOn }),
     });
+  };
+
+  window.logout = async function () {
+    try {
+      await auth.signOut();
+    } catch (err) {
+      console.error('Sign out error:', err);
+    }
+    window.location.href = '/auth.html';
   };
 
   loadProfile();
