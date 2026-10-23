@@ -83,7 +83,7 @@
     const pw = document.getElementById('pw-input').value;
     let res;
     try {
-      res = await fetch('/api/admin/stats', { headers: { 'X-Admin-Password': pw } });
+      res = await fetch('/api/stats', { headers: { 'X-Admin-Password': pw } });
     } catch (err) {
       document.getElementById('gate-error').textContent = 'Network error: ' + err.message;
       return;
@@ -127,7 +127,7 @@
   }
 
   async function loadStats() {
-    const res = await fetch('/api/admin/stats', { headers: { 'X-Admin-Password': adminPassword } });
+    const res = await fetch('/api/stats', { headers: { 'X-Admin-Password': adminPassword } });
     if (!res.ok) return;
     const data = await res.json();
     document.getElementById('stat-total').textContent = data.totalUsers;
@@ -146,7 +146,7 @@
   ];
 
   async function loadConfig() {
-    const res = await fetch('/api/admin/config');
+    const res = await fetch('/api/config');
     if (!res.ok) return;
     const config = await res.json();
     const editor = document.getElementById('color-editor');
@@ -163,7 +163,7 @@
   async function updateColor(key, value) {
     const statusEl = document.getElementById('status');
     statusEl.textContent = 'Saving…';
-    const res = await fetch('/api/admin/config', {
+    const res = await fetch('/api/config', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
       body: JSON.stringify({ key, value }),
