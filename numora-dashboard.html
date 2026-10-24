@@ -305,10 +305,14 @@
     <div class="modal">
       <h2 id="numinfo-title"></h2>
       <div class="subtext" id="numinfo-subtitle" style="margin-bottom:14px;"></div>
+      <div id="numinfo-calculation" style="display:none; font-family:monospace; font-size:13px; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:10px 12px; margin-bottom:14px; line-height:1.6;"></div>
       <div id="numinfo-summary" style="font-size:14px; line-height:1.6; margin-bottom:14px;"></div>
       <div id="numinfo-strengths" style="margin-bottom:10px;"></div>
       <div id="numinfo-weaknesses" style="margin-bottom:10px;"></div>
-      <div id="numinfo-career" class="subtext"></div>
+      <div id="numinfo-career" class="subtext" style="margin-bottom:14px;"></div>
+      <div id="numinfo-application" style="display:none; font-size:14px; line-height:1.6; margin-bottom:14px;"></div>
+      <div id="numinfo-reflection" style="display:none; font-style:italic; font-size:14px; line-height:1.6; margin-bottom:14px; color:var(--brand);"></div>
+      <div id="numinfo-action" style="display:none; font-size:14px; line-height:1.6; font-weight:700; margin-bottom:4px;"></div>
       <button class="close-btn" onclick="closeNumberModal()">Close</button>
     </div>
   </div>
@@ -377,18 +381,66 @@
   // multiple numerology references; lifePathDetail/root content additionally
   // sourced from the user-provided Numerology Name Calculator Handbook).
   const LIFE_PATH = {
-    1: { title: "The Leader", summary: "Independence, leadership, originality. Natural initiator who turns ideas into reality through willpower and self-direction.", strengths: ["Innovator","Lionhearted","Ingenious","Inspired","Committed"], weaknesses: ["Desirous","Unforgiving","Authoritative","Contentious","Confrontational"], career: "Business owners, managers, supervisors, executives, team leaders." },
-    2: { title: "The Diplomat", summary: "Cooperation, diplomacy, sensitivity. Thrives on partnership, harmony, and reading what others need.", strengths: ["Amicable","Instinctual","Caring","Reassuring","Compassionate"], weaknesses: ["Mercurial","Oversensitive","Unforthcoming","Envious","Ambivalent"], career: "Counselors, mediators, negotiators, therapists." },
-    3: { title: "The Communicator", summary: "Creativity, self-expression, social skill. Translates feelings into words, art, or performance.", strengths: ["Entertaining","Visionary","Innovative","Amiable","Charming"], weaknesses: ["Scattered","Condemning","Extravagant","Needy","Muckrake"], career: "Artists, actors, entertainers." },
-    4: { title: "The Builder", summary: "Stability, organization, practicality. Builds things that last through steady, methodical work.", strengths: ["Diligent","Efficient","Grounded","Accountable","Attentive"], weaknesses: ["Stubborn","Bigoted","Obstinate","Intolerant","Gloomy"], career: "CEOs, managers, accountants, auditors, editors, surveyors, analysts." },
-    5: { title: "The Adventurer", summary: "Freedom, adventure, adaptability. Craves variety and full experience.", strengths: ["Ingenious","Gifted","Connector","Versatile","Fascinating"], weaknesses: ["Compulsive","Sensational","Unforgiving","Distracted","Inconsistent"], career: "Salespeople, advisors, consultants, project managers, event planners." },
-    6: { title: "The Nurturer", summary: "Responsibility, nurturing, harmony. Natural caregiver drawn to family and community.", strengths: ["Cultivative","Reassuring","Commiserating","Compassionate","Dependable"], weaknesses: ["Domineering","Condemnatory","Meddlesome","Sanctimonious","Purist"], career: "Teachers, counselors, therapists." },
-    7: { title: "The Seeker", summary: "Analysis, introspection, spirituality. Analytical mind drawn to research, solitude, and deeper truth.", strengths: ["Clever","Scientific","Scrutinizing","Instinctive","Systematic"], weaknesses: ["Liberal","Taciturn","Despondent","Pessimistic","Doubtful"], career: "Psychiatrists, psychologists, counselors, therapists." },
-    8: { title: "The Powerhouse", summary: "Ambition, authority, material success. Driven toward achievement and tangible results.", strengths: ["Methodical","Stimulate","Motivated","Powerful","Studious"], weaknesses: ["Masterful","Wealthy","Threatening","Shallow","Scheming"], career: "Business owners, CEOs, supervisors, managers." },
-    9: { title: "The Humanitarian", summary: "Compassion, wisdom, humanitarianism. Oriented toward service to others and the collective good.", strengths: ["Pitying","Magnanimous","Intense","Indulgent","Encouraging"], weaknesses: ["Merciless","Vindictive","Protective","Exaggerated","Hostile"], career: "Teachers, counselors, therapists." },
-    11: { title: "The Intuitive (Master Number)", summary: "Heightened idealism, intuition, and sensitivity. A more intense version of 2's themes, not reduced further.", strengths: ["Natural","Freethinking","Creative","Profound","Negotiator"], weaknesses: ["Timorous","Cunning","Self-deceptive","Vulnerable"], career: "Counselors and therapists." },
-    22: { title: "The Master Builder (Master Number)", summary: "Large-scale vision paired with practical execution. A more intense version of 4's themes.", strengths: ["Far-sighted","Dynamic","Loyal","Engrossed"], weaknesses: ["Immovable","Plodding","Headstrong","Hegemonic"], career: "Business owners, CEOs, managers." },
-    33: { title: "The Master Teacher (Master Number)", summary: "Selfless service and compassion at a heightened level. A more intense version of 6's themes.", strengths: ["Artistic","Healthful","Gentle","Affectionate"], weaknesses: ["Precisionist","Scathing","Sanctimonious"], career: "Counselors, therapists, health professionals." },
+    1: { title: "The Leader", summary: "Independence, leadership, originality. Natural initiator who turns ideas into reality through willpower and self-direction.", strengths: ["Innovator","Lionhearted","Ingenious","Inspired","Committed"], weaknesses: ["Desirous","Unforgiving","Authoritative","Contentious","Confrontational"], career: "Business owners, managers, supervisors, executives, team leaders.",
+      interpretation: "A 1 Life Path traditionally points to someone built to go first, to start things rather than join things already in motion. The pull is toward self-direction: deciding for yourself rather than waiting to be told, and trusting your own read on a situation over the crowd's.",
+      application: "This often shows up in how someone handles a stalled project or a group that's waiting for direction, stepping in to decide rather than waiting to be asked.",
+      reflection: "Where in your life are you waiting for permission to lead, when you could just start?",
+      action: "Pick one decision you've been putting off and make it today, without asking anyone else first." },
+    2: { title: "The Diplomat", summary: "Cooperation, diplomacy, sensitivity. Thrives on partnership, harmony, and reading what others need.", strengths: ["Amicable","Instinctual","Caring","Reassuring","Compassionate"], weaknesses: ["Mercurial","Oversensitive","Unforthcoming","Envious","Ambivalent"], career: "Counselors, mediators, negotiators, therapists.",
+      interpretation: "A 2 Life Path traditionally centers on relationship: sensing what the room needs, smoothing friction before it becomes conflict, and finding the shared ground between two sides. The risk is doing this so often for others that your own preference gets lost in the process.",
+      application: "Often shows up as being the one people come to when two sides of a disagreement need translating to each other.",
+      reflection: "In your closest relationship, whose preferences have you been deferring to lately, and is that balance still fair?",
+      action: "Name one thing you actually want this week, out loud, to someone, before you ask what they want." },
+    3: { title: "The Communicator", summary: "Creativity, self-expression, social skill. Translates feelings into words, art, or performance.", strengths: ["Entertaining","Visionary","Innovative","Amiable","Charming"], weaknesses: ["Scattered","Condemning","Extravagant","Needy","Muckrake"], career: "Artists, actors, entertainers.",
+      interpretation: "A 3 Life Path traditionally carries a need to externalize what's felt internally, through words, art, humor, or performance. The gift is making the abstract land for other people; the risk is spreading that expressive energy across too many half-finished things at once.",
+      application: "Often shows up as the instinct to turn a private feeling into something shareable, a post, a joke, a story, rather than sitting with it quietly.",
+      reflection: "What's one idea you've talked about making but haven't actually finished?",
+      action: "Finish one small creative thing this week, even imperfectly, instead of starting a new one." },
+    4: { title: "The Builder", summary: "Stability, organization, practicality. Builds things that last through steady, methodical work.", strengths: ["Diligent","Efficient","Grounded","Accountable","Attentive"], weaknesses: ["Stubborn","Bigoted","Obstinate","Intolerant","Gloomy"], career: "CEOs, managers, accountants, auditors, editors, surveyors, analysts.",
+      interpretation: "A 4 Life Path traditionally values the unglamorous work that makes something actually hold together: structure, follow-through, doing the next right step even when it's boring. The risk is gripping a plan so tightly that you can't adapt when circumstances genuinely change.",
+      application: "Often shows up as being the person who notices the detail everyone else skipped, and quietly fixes it without being asked.",
+      reflection: "Is there a plan or routine you're holding onto out of habit, even though it's stopped actually serving you?",
+      action: "Finish one piece of unglamorous admin or cleanup you've been putting off." },
+    5: { title: "The Adventurer", summary: "Freedom, adventure, adaptability. Craves variety and full experience.", strengths: ["Ingenious","Gifted","Connector","Versatile","Fascinating"], weaknesses: ["Compulsive","Sensational","Unforgiving","Distracted","Inconsistent"], career: "Salespeople, advisors, consultants, project managers, event planners.",
+      interpretation: "A 5 Life Path traditionally resists being boxed in, change, variety, and new experience feel like oxygen, while routine can feel like a slow suffocation. The strength is genuine adaptability; the risk is restlessness that never lets anything finish or deepen.",
+      application: "Often shows up as being the one who gets bored first in a group and starts looking for what's next, even mid-conversation.",
+      reflection: "What's something you keep abandoning right before it gets hard, not because it stopped being worth it, but because it stopped being new?",
+      action: "Commit to finishing one thing you'd normally walk away from when it gets repetitive." },
+    6: { title: "The Nurturer", summary: "Responsibility, nurturing, harmony. Natural caregiver drawn to family and community.", strengths: ["Cultivative","Reassuring","Commiserating","Compassionate","Dependable"], weaknesses: ["Domineering","Condemnatory","Meddlesome","Sanctimonious","Purist"], career: "Teachers, counselors, therapists.",
+      interpretation: "A 6 Life Path traditionally orients around care, of family, of community, of whoever's nearby and in need. The strength is real dependability people can lean on; the risk is caretaking tipping into control, offering help that wasn't actually asked for.",
+      application: "Often shows up as noticing what a friend or family member needs before they've said anything, and stepping in to fix it.",
+      reflection: "Is there someone in your life you're taking care of in a way they haven't actually asked for?",
+      action: "Before helping someone today, ask them directly what they actually want, instead of assuming." },
+    7: { title: "The Seeker", summary: "Analysis, introspection, spirituality. Analytical mind drawn to research, solitude, and deeper truth.", strengths: ["Clever","Scientific","Scrutinizing","Instinctive","Systematic"], weaknesses: ["Liberal","Taciturn","Despondent","Pessimistic","Doubtful"], career: "Psychiatrists, psychologists, counselors, therapists.",
+      interpretation: "A 7 Life Path traditionally needs to understand *why*, not just accept things at face value, pulling toward research, solitude, and sitting with a question until it actually makes sense. The strength is real depth; the risk is retreating so far inward that connection with other people quietly erodes.",
+      application: "Often shows up as needing time alone to actually process a decision before talking it through with anyone else.",
+      reflection: "Is there a question or decision you've been quietly turning over alone that you actually need to say out loud to someone?",
+      action: "Share one thing you've been privately thinking through with someone you trust, today." },
+    8: { title: "The Powerhouse", summary: "Ambition, authority, material success. Driven toward achievement and tangible results.", strengths: ["Methodical","Stimulate","Motivated","Powerful","Studious"], weaknesses: ["Masterful","Wealthy","Threatening","Shallow","Scheming"], career: "Business owners, CEOs, supervisors, managers.",
+      interpretation: "An 8 Life Path traditionally measures progress in tangible terms, results, authority, material outcomes that can actually be pointed to. The strength is real drive toward achievement; the risk is letting that measuring stick crowd out everything that can't be quantified.",
+      application: "Often shows up as evaluating a week by what got accomplished, more than by how it felt.",
+      reflection: "What's something in your life that matters to you but has no measurable outcome attached to it?",
+      action: "Spend time today on something worthwhile that produces no visible result at all." },
+    9: { title: "The Humanitarian", summary: "Compassion, wisdom, humanitarianism. Oriented toward service to others and the collective good.", strengths: ["Pitying","Magnanimous","Intense","Indulgent","Encouraging"], weaknesses: ["Merciless","Vindictive","Protective","Exaggerated","Hostile"], career: "Teachers, counselors, therapists.",
+      interpretation: "A 9 Life Path traditionally looks outward toward the bigger picture, humanity, fairness, the collective good, sometimes at the expense of smaller, personal needs close to home. The strength is real compassion at scale; the risk is holding onto old grievances with surprising intensity when that fairness feels violated.",
+      application: "Often shows up as caring deeply about causes and people far outside your immediate circle.",
+      reflection: "Is there an old hurt you're still carrying that you could actually let go of now?",
+      action: "Let go of one small grudge today, actively, not just by ignoring it." },
+    11: { title: "The Intuitive (Master Number)", summary: "Heightened idealism, intuition, and sensitivity. A more intense version of 2's themes, not reduced further.", strengths: ["Natural","Freethinking","Creative","Profound","Negotiator"], weaknesses: ["Timorous","Cunning","Self-deceptive","Vulnerable"], career: "Counselors and therapists.",
+      interpretation: "An 11 Life Path traditionally carries 2's relational sensitivity at a heightened, more intense pitch, strong intuition, idealism, and perceptiveness, paired with a nervous energy that can tip into self-doubt under pressure.",
+      application: "Often shows up as picking up on things in a room or relationship before anyone says them out loud.",
+      reflection: "Where have you talked yourself out of trusting an instinct that turned out to be right?",
+      action: "Act on one instinct today instead of second-guessing it first." },
+    22: { title: "The Master Builder (Master Number)", summary: "Large-scale vision paired with practical execution. A more intense version of 4's themes.", strengths: ["Far-sighted","Dynamic","Loyal","Engrossed"], weaknesses: ["Immovable","Plodding","Headstrong","Hegemonic"], career: "Business owners, CEOs, managers.",
+      interpretation: "A 22 Life Path traditionally carries 4's practical, structured drive at a larger scale, the capacity to turn a big, ambitious vision into something real and lasting, not just dream about it.",
+      application: "Often shows up as thinking in terms of long-term systems and structures rather than one-off tasks.",
+      reflection: "Is there a big vision you've been sitting on that needs one practical first step, not more planning?",
+      action: "Take one concrete, practical step today toward a big goal you've been only thinking about." },
+    33: { title: "The Master Teacher (Master Number)", summary: "Selfless service and compassion at a heightened level. A more intense version of 6's themes.", strengths: ["Artistic","Healthful","Gentle","Affectionate"], weaknesses: ["Precisionist","Scathing","Sanctimonious"], career: "Counselors, therapists, health professionals.",
+      interpretation: "A 33 Life Path traditionally carries 6's nurturing instinct at a heightened level, care and compassion extended outward with real selflessness, sometimes to the point of self-sacrifice.",
+      application: "Often shows up as putting others' wellbeing ahead of your own, consistently, without being asked to.",
+      reflection: "When did you last put your own needs first, without guilt attached?",
+      action: "Do one thing today purely for yourself, with no justification needed." },
   };
   const EXPRESSION = {1:"Natural talent for leadership and forging an independent path.",2:"Gift for mediation, partnership, and organisational work.",3:"Creative, artistic talent and a natural ability for self-expression.",4:"Practical, down-to-earth ability to build and organise.",5:"Versatile talent suited to variety, travel, and adaptability.",6:"Natural ability in caregiving, teaching, or community-oriented roles.",7:"Talent for research, analysis, and specialised knowledge.",8:"Natural capability for business, authority, and material achievement.",9:"Talent expressed through service, art, or humanitarian work.",11:"Heightened, intuitive version of the Expression 2 talent for partnership."};
   const SOUL_URGE = {1:"A desire for independence, leadership, and autonomy.",2:"A deep longing for harmony, peace, and close relationships.",3:"A need for self-expression, creativity, and joy.",4:"A strong desire for security, stability, and hard work.",5:"A yearning for freedom, change, and excitement.",6:"A need to nurture others and focus on family and home life.",7:"A deep inner need for solitude, reflection, and spiritual growth.",8:"A desire for material success, ambition, and leadership.",9:"A longing to help others and bring about positive change."};
@@ -403,16 +455,34 @@
     const strengthsEl = document.getElementById('numinfo-strengths');
     const weaknessesEl = document.getElementById('numinfo-weaknesses');
     const careerEl = document.getElementById('numinfo-career');
+    const calcEl = document.getElementById('numinfo-calculation');
+    const applicationEl = document.getElementById('numinfo-application');
+    const reflectionEl = document.getElementById('numinfo-reflection');
+    const actionEl = document.getElementById('numinfo-action');
     strengthsEl.innerHTML = ''; weaknessesEl.innerHTML = ''; careerEl.textContent = '';
+    calcEl.style.display = 'none'; applicationEl.style.display = 'none';
+    reflectionEl.style.display = 'none'; actionEl.style.display = 'none';
 
     if (type === 'lifePath') {
       const d = LIFE_PATH[num];
       document.getElementById('numinfo-title').textContent = 'Life Path ' + num;
       document.getElementById('numinfo-subtitle').textContent = d.title;
-      document.getElementById('numinfo-summary').textContent = d.summary;
+
+      if (myLifePathCalculation) {
+        const c = myLifePathCalculation;
+        const stepLines = c.reductionSteps.map(s => `${s.expression} = ${s.result}`).join('<br>');
+        calcEl.innerHTML = `${c.expression} = ${c.total}<br>${stepLines}`;
+        calcEl.style.display = 'block';
+      }
+
+      document.getElementById('numinfo-summary').textContent = d.interpretation || d.summary;
       strengthsEl.innerHTML = '<strong>Strengths:</strong> ' + d.strengths.join(', ');
       weaknessesEl.innerHTML = '<strong>Watch for:</strong> ' + d.weaknesses.join(', ');
       careerEl.textContent = 'Suits: ' + d.career;
+
+      if (d.application) { applicationEl.textContent = 'In practice: ' + d.application; applicationEl.style.display = 'block'; }
+      if (d.reflection) { reflectionEl.textContent = d.reflection; reflectionEl.style.display = 'block'; }
+      if (d.action) { actionEl.textContent = 'Try: ' + d.action; actionEl.style.display = 'block'; }
     } else if (type === 'expression') {
       document.getElementById('numinfo-title').textContent = 'Expression ' + num;
       document.getElementById('numinfo-subtitle').textContent = 'Your natural talent';
@@ -484,6 +554,7 @@
   }
 
   let myBirthdate = null;
+  let myLifePathCalculation = null;
 
   async function loadProfile() {
     const res = await authedFetch('/api/profile');
@@ -494,6 +565,7 @@
     }
     const { numbers, birthdate, numerologySystem, pushOptIn } = await res.json();
     myBirthdate = birthdate;
+    myLifePathCalculation = numbers.lifePathCalculation || null;
     document.getElementById('system-select').value = numerologySystem || 'pythagorean';
     document.getElementById('push-select').value = pushOptIn ? 'on' : 'off';
     document.getElementById('pv-lifepath').textContent = numbers.lifePath;
