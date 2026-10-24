@@ -5,6 +5,13 @@
  * syntax changed (export instead of module.exports) to match this
  * project's "type": "module" setting.
  */
+import { calculateLifePath as calculateLifePathWithSteps } from './numora-pythagorean-engine.js';
+// ^ supplied engine (user-provided, sourced from the Numerology Name
+// Calculator Handbook), verified against its own worked examples AND
+// cross-checked to produce identical numbers to this file's own
+// getLifePathNumber() before being wired in. Used here only to surface
+// the calculation STEPS for transparent display — the number itself was
+// already correct and live; this doesn't change any existing result.
 
 function reduceNumber(num) {
   const masterNumbers = [11, 22, 33];
@@ -169,9 +176,27 @@ export function getRootNumber(input) {
 }
 
 export function getFullProfile(birthdate, fullName = null, currentDate = new Date(), system = 'pythagorean') {
+  // Transparent calculation steps for the Life Path deep reading. Computed
+  // separately from (and cross-checked against) the lifePath number above —
+  // if these two ever disagree, that's a bug to catch, not something to
+  // silently trust.
+  const lifePathWithSteps = calculateLifePathWithSteps({
+    year: birthdate.getFullYear(),
+    month: birthdate.getMonth() + 1,
+    day: birthdate.getDate(),
+  });
+
+  if (lifePathWithSteps.number !== getLifePathNumber(birthdate)) {
+    // Should never happen — both engines were verified to agree — but if
+    // they ever diverge, that's a real bug worth knowing about rather than
+    // silently serving a mismatched number.
+    console.error('Life Path engine mismatch:', lifePathWithSteps.number, 'vs', getLifePathNumber(birthdate));
+  }
+
   const profile = {
     system,
     lifePath: getLifePathNumber(birthdate),
+    lifePathCalculation: lifePathWithSteps.calculation,
     birthDay: getBirthDayNumber(birthdate),
     attitude: getAttitudeNumber(birthdate),
     personalYear: getPersonalYear(birthdate, currentDate),
