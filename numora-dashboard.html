@@ -477,8 +477,8 @@
       document.getElementById('numinfo-title').textContent = 'Life Path ' + num;
       document.getElementById('numinfo-subtitle').textContent = d.title;
 
-      if (myLifePathCalculation) {
-        const c = myLifePathCalculation;
+      if (window.myLifePathCalculation) {
+        const c = window.myLifePathCalculation;
         const stepLines = c.reductionSteps.map(s => `${s.expression} = ${s.result}`).join('<br>');
         calcEl.innerHTML = `${c.expression} = ${c.total}<br>${stepLines}`;
         calcEl.style.display = 'block';
@@ -563,7 +563,7 @@
   }
 
   let myBirthdate = null;
-  let myLifePathCalculation = null;
+  window.myLifePathCalculation = null; // exposed on window — this module's own scope isn't visible to the plain, non-module script block that reads it in openNumberModal()
 
   async function loadProfile() {
     const res = await authedFetch('/api/profile');
@@ -574,7 +574,7 @@
     }
     const { numbers, birthdate, numerologySystem, pushOptIn } = await res.json();
     myBirthdate = birthdate;
-    myLifePathCalculation = numbers.lifePathCalculation || null;
+    window.myLifePathCalculation = numbers.lifePathCalculation || null;
     document.getElementById('system-select').value = numerologySystem || 'pythagorean';
     document.getElementById('push-select').value = pushOptIn ? 'on' : 'off';
     document.getElementById('pv-lifepath').textContent = numbers.lifePath;
