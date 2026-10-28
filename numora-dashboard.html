@@ -293,8 +293,13 @@
   <div class="overlay" id="day-overlay" onclick="if(event.target===this) closeDayModal()">
     <div class="modal">
       <h2 id="day-modal-num"></h2>
-      <div class="subtext" id="day-modal-keyword"></div>
-      <div id="day-modal-summary" style="font-size:14px; line-height:1.5;"></div>
+      <div class="subtext" id="day-modal-keyword" style="margin-bottom:4px;"></div>
+      <div style="font-size:11px; letter-spacing:0.5px; text-transform:uppercase; color:var(--muted); margin-bottom:10px;">Calculated from your birthdate and this date</div>
+      <div id="day-modal-calc" style="font-family:monospace; font-size:12px; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:10px 12px; margin-bottom:14px; line-height:1.6;"></div>
+      <div id="day-modal-summary" style="font-size:14px; line-height:1.5; margin-bottom:14px;"></div>
+      <div id="day-modal-application" style="font-size:14px; line-height:1.5; margin-bottom:14px;"></div>
+      <div id="day-modal-reflection" style="font-style:italic; font-size:14px; line-height:1.5; margin-bottom:14px; color:var(--brand);"></div>
+      <div id="day-modal-action" style="font-size:14px; font-weight:700; margin-bottom:4px;"></div>
       <button class="close-btn" onclick="closeDayModal()">Close</button>
     </div>
   </div>
@@ -304,7 +309,8 @@
   <div class="overlay" id="numinfo-overlay" onclick="if(event.target===this) closeNumberModal()">
     <div class="modal">
       <h2 id="numinfo-title"></h2>
-      <div class="subtext" id="numinfo-subtitle" style="margin-bottom:14px;"></div>
+      <div class="subtext" id="numinfo-subtitle" style="margin-bottom:4px;"></div>
+      <div id="numinfo-source" style="display:none; font-size:11px; letter-spacing:0.5px; text-transform:uppercase; color:var(--muted); margin-bottom:10px;"></div>
       <div id="numinfo-calculation" style="display:none; font-family:monospace; font-size:13px; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:10px 12px; margin-bottom:14px; line-height:1.6;"></div>
       <div id="numinfo-summary" style="font-size:14px; line-height:1.6; margin-bottom:14px;"></div>
       <div id="numinfo-strengths" style="margin-bottom:10px;"></div>
@@ -364,24 +370,78 @@
     6:"Care",7:"Reflect",8:"Push",9:"Release"};
 
   const DAY_DETAILS = {
-    1: "A day favoring initiative, decisions, and leading rather than following.",
-    2: "A day favoring patience, listening, and working alongside others.",
-    3: "A day favoring communication and creative output.",
-    4: "A day favoring structure, discipline, and steady unglamorous work.",
-    5: "A day favoring change, variety, and breaking from routine.",
-    6: "A day favoring responsibility, care, and obligations.",
-    7: "A day favoring solitude, study, and thinking things through.",
-    8: "A day favoring ambition, authority, and material matters.",
-    9: "A day favoring closure and release."
+    1: { summary: "A day favoring initiative, decisions, and leading rather than following.", application: "Good for starting something you've been putting off.", reflection: "What's one decision you could make today instead of waiting?", action: "Make the call or send the message you've been delaying." },
+    2: { summary: "A day favoring patience, listening, and working alongside others.", application: "Good for repairing friction or checking in with someone.", reflection: "Who could use you listening more than talking today?", action: "Let someone else choose today, without pushing your own preference." },
+    3: { summary: "A day favoring communication and creative output.", application: "Good for sharing an idea or creating something.", reflection: "What have you been sitting on that's ready to be said or made?", action: "Say or make the thing you've been holding back today." },
+    4: { summary: "A day favoring structure, discipline, and steady unglamorous work.", application: "Good for admin, organizing, or finishing loose ends.", reflection: "What small task has been quietly piling up?", action: "Clear one piece of unfinished admin today." },
+    5: { summary: "A day favoring change, variety, and breaking from routine.", application: "Good for trying something different or adjusting a plan.", reflection: "What's starting to feel stale that could use a change?", action: "Break one small routine on purpose today." },
+    6: { summary: "A day favoring responsibility, care, and obligations.", application: "Good for checking in on family or fixing what's been neglected.", reflection: "Who's been waiting on you to show up for them?", action: "Reach out to someone who needs your attention today." },
+    7: { summary: "A day favoring solitude, study, and thinking things through.", application: "Good for research, reflection, or sitting with a decision before acting.", reflection: "What decision needs more thought before you act on it?", action: "Take time alone today before deciding on something important." },
+    8: { summary: "A day favoring ambition, authority, and material matters.", application: "Good for business moves, money decisions, or being assertive.", reflection: "What ambitious move have you been hesitating on?", action: "Make one bold, assertive move today." },
+    9: { summary: "A day favoring closure and release.", application: "Good for finishing something or letting go of what's run its course.", reflection: "What's overdue for closure in your life right now?", action: "Close out one loose end today, for good." }
   };
 
   function openDayModal(day, num) {
     document.getElementById('day-modal-num').textContent = 'Day ' + day + ' — ' + num;
     document.getElementById('day-modal-keyword').textContent = KEYWORDS[num];
-    document.getElementById('day-modal-summary').textContent = DAY_DETAILS[num];
+    const d = DAY_DETAILS[num];
+    document.getElementById('day-modal-summary').textContent = d.summary;
+    document.getElementById('day-modal-application').textContent = 'In practice: ' + d.application;
+    document.getElementById('day-modal-reflection').textContent = d.reflection;
+    document.getElementById('day-modal-action').textContent = 'Try: ' + d.action;
+
+    if (window.currentCalc) {
+      const c = window.currentCalc;
+      document.getElementById('day-modal-calc').innerHTML =
+        `Personal Year: ${c.pyExpr} = ${c.py}<br>` +
+        `Personal Month: ${c.py} + ${c.month} = ${c.pm}<br>` +
+        `Personal Day: ${c.pm} + ${day} = ${num}`;
+    }
+
     document.getElementById('day-overlay').classList.add('open');
   }
   function closeDayModal() { document.getElementById('day-overlay').classList.remove('open'); }
+
+  // Content for Number Lookup. Framed as symbolic reflection about a number
+  // that caught your attention, never as a message, prediction, or sign.
+  const LOOKUP_CONTENT = {
+    1: { application: "In this tradition, a 1 is associated with beginnings and independence.", reflection: "Is there something new you've been circling around starting, lately?", action: "Write down one thing you'd start if you stopped waiting." },
+    2: { application: "In this tradition, a 2 is associated with partnership and balance.", reflection: "Is there a relationship in your life currently asking for more balance?", action: "Check in with one person you've been meaning to." },
+    3: { application: "In this tradition, a 3 is associated with expression and creativity.", reflection: "Is there something you've been wanting to say or make, and haven't yet?", action: "Spend ten minutes making or writing something, with no goal." },
+    4: { application: "In this tradition, a 4 is associated with structure and steady effort.", reflection: "Which part of your life most needs a bit more order right now?", action: "Fix one small thing that's been quietly disorganized." },
+    5: { application: "In this tradition, a 5 is associated with change and freedom.", reflection: "Is something in your life ready for a change you've been avoiding?", action: "Try one small, new thing this week." },
+    6: { application: "In this tradition, a 6 is associated with care and responsibility.", reflection: "Who in your life could use more of your time or attention right now?", action: "Reach out to someone you've been meaning to check on." },
+    7: { application: "In this tradition, a 7 is associated with reflection and inner questions.", reflection: "What question have you been too busy to sit with lately?", action: "Set aside a quiet ten minutes to think, with no screen." },
+    8: { application: "In this tradition, an 8 is associated with ambition and tangible results.", reflection: "What goal have you been holding back on pursuing?", action: "Take one concrete step toward it this week." },
+    9: { application: "In this tradition, a 9 is associated with completion and release.", reflection: "What in your life feels ready to be finished or let go of?", action: "Close out one small unfinished thing today." },
+  };
+
+  const COMPAT_CONTENT = {
+    'strong-match': {
+      label: 'Strong Match',
+      explanation: "You share the exact same Life Path number. Traditionally, this means you likely recognize a lot of yourselves in each other, similar instincts, similar blind spots too, since you're drawn to the same patterns.",
+      communicationTip: "Since you likely approach things the same way, actively ask each other's perspective rather than assuming you already know it, you might both be missing the same thing.",
+      reflection: "Where might you both be reinforcing the same blind spot, rather than balancing each other out?",
+    },
+    harmonious: {
+      label: 'Harmonious',
+      explanation: "Your Life Path numbers fall in the same traditional compatibility group. This generally suggests an easier natural rhythm between you, your core approaches to life tend to complement rather than clash.",
+      communicationTip: "Use the natural ease between you to tackle harder conversations, the goodwill is usually there to support it.",
+      reflection: "Is there a harder conversation you've been avoiding, that this relationship's natural ease could actually support?",
+    },
+    neutral: {
+      label: 'Neutral',
+      explanation: "Your Life Path numbers fall in different traditional groups. This doesn't mean incompatibility, it generally means your core approaches to life are genuinely different, which can be a source of either friction or real complementary strength, depending on how it's handled.",
+      communicationTip: "Name the difference in approach directly rather than assuming the other person sees things the way you do.",
+      reflection: "Where has this person's different approach actually helped you see something you would have missed alone?",
+    },
+  };
+
+  function renderLifePathCalc(calc) {
+    if (!calc) return '';
+    const steps = calc.reductionSteps.map(s => `${s.expression} = ${s.result}`).join('<br>');
+    return `${calc.expression} = ${calc.total}${steps ? '<br>' + steps : ''}`;
+  }
 
   function openCompat() { document.getElementById('compat-overlay').classList.add('open'); }
   function closeCompat() { document.getElementById('compat-overlay').classList.remove('open'); }
@@ -451,10 +511,52 @@
       reflection: "When did you last put your own needs first, without guilt attached?",
       action: "Do one thing today purely for yourself, with no justification needed." },
   };
-  const EXPRESSION = {1:"Natural talent for leadership and forging an independent path.",2:"Gift for mediation, partnership, and organisational work.",3:"Creative, artistic talent and a natural ability for self-expression.",4:"Practical, down-to-earth ability to build and organise.",5:"Versatile talent suited to variety, travel, and adaptability.",6:"Natural ability in caregiving, teaching, or community-oriented roles.",7:"Talent for research, analysis, and specialised knowledge.",8:"Natural capability for business, authority, and material achievement.",9:"Talent expressed through service, art, or humanitarian work.",11:"Heightened, intuitive version of the Expression 2 talent for partnership."};
-  const SOUL_URGE = {1:"A desire for independence, leadership, and autonomy.",2:"A deep longing for harmony, peace, and close relationships.",3:"A need for self-expression, creativity, and joy.",4:"A strong desire for security, stability, and hard work.",5:"A yearning for freedom, change, and excitement.",6:"A need to nurture others and focus on family and home life.",7:"A deep inner need for solitude, reflection, and spiritual growth.",8:"A desire for material success, ambition, and leadership.",9:"A longing to help others and bring about positive change."};
-  const PERSONALITY = {1:"Comes across as confident, direct, and self-assured.",2:"Comes across as gentle, diplomatic, and easy to approach.",3:"Comes across as expressive, sociable, and good-humoured.",4:"Comes across as grounded, reliable, and disciplined.",5:"Comes across as energetic, adaptable, and magnetic.",6:"Comes across as warm, responsible, and caring.",7:"Comes across as reserved, thoughtful, and perceptive.",8:"Comes across as authoritative, ambitious, and capable.",9:"Comes across as compassionate, broad-minded, and idealistic.",11:"Comes across as intense, perceptive, and quietly magnetic."};
-  const ROOT = {1:{keyword:"Beginnings",summary:"Independence, leadership, originality, new starts."},2:{keyword:"Balance",summary:"Cooperation, diplomacy, partnership, sensitivity."},3:{keyword:"Expression",summary:"Creativity, communication, self-expression, joy."},4:{keyword:"Structure",summary:"Stability, organisation, practicality, hard work."},5:{keyword:"Change",summary:"Freedom, adventure, adaptability, variety."},6:{keyword:"Care",summary:"Responsibility, nurturing, harmony, family."},7:{keyword:"Reflection",summary:"Analysis, introspection, spirituality, solitude."},8:{keyword:"Power",summary:"Ambition, authority, material success, achievement."},9:{keyword:"Completion",summary:"Compassion, wisdom, humanitarianism, release."}};
+  const EXPRESSION = {
+    1: { summary: "Natural talent for leadership and forging an independent path.", application: "Shows up as being handed responsibility early, or taking it before it's offered.", reflection: "Where are you letting someone else lead something you're actually better suited to run?", action: "Volunteer to lead one thing today instead of waiting to be asked." },
+    2: { summary: "Gift for mediation, partnership, and organisational work.", application: "Shows up as being the one who naturally keeps a group or team working together smoothly.", reflection: "Is there a partnership right now where you're doing more of the mediating than your share?", action: "Let someone else smooth over the next disagreement instead of stepping in yourself." },
+    3: { summary: "Creative, artistic talent and a natural ability for self-expression.", application: "Shows up as a natural ease putting feeling into words, image, or performance for others.", reflection: "What talent have you been sitting on because it felt too unpolished to share?", action: "Share one unfinished creative thing with someone today, as-is." },
+    4: { summary: "Practical, down-to-earth ability to build and organise.", application: "Shows up as being trusted with the structural, detail-heavy parts of a project.", reflection: "What's one system in your life that would run better if you actually documented it?", action: "Organize or document one messy process today." },
+    5: { summary: "Versatile talent suited to variety, travel, and adaptability.", application: "Shows up as adapting fast when plans change, often faster than everyone else in the room.", reflection: "Where is your adaptability being used to avoid commitment rather than to genuinely adjust?", action: "Commit to one plan today without leaving yourself an exit." },
+    6: { summary: "Natural ability in caregiving, teaching, or community-oriented roles.", application: "Shows up as naturally being the one others come to for guidance or support.", reflection: "Who's teaching or guiding you right now, or is it only ever the other way around?", action: "Ask someone for advice today instead of giving it." },
+    7: { summary: "Talent for research, analysis, and specialised knowledge.", application: "Shows up as going deeper into a subject than the conversation actually called for.", reflection: "Is there a piece of knowledge you've been hoarding that would actually help someone if you shared it?", action: "Teach someone something you know today." },
+    8: { summary: "Natural capability for business, authority, and material achievement.", application: "Shows up as naturally stepping into authority, or being given it, in work settings.", reflection: "Is there a goal you're pursuing for the achievement itself, more than for what it would actually give you?", action: "Name, honestly, what you actually want an achievement to bring you." },
+    9: { summary: "Talent expressed through service, art, or humanitarian work.", application: "Shows up as talent that feels most alive when it's in service of something bigger than yourself.", reflection: "Is there a talent you're underusing because it doesn't feel 'important' enough?", action: "Use a skill you've been underusing to help someone today." },
+    11: { summary: "Heightened, intuitive version of the Expression 2 talent for partnership.", application: "Shows up as sensing what a partnership or collaboration needs before it's spoken.", reflection: "Where have you muted your own intuition to keep a partnership comfortable?", action: "Voice an intuition in a partnership today instead of sitting on it." },
+  };
+  const SOUL_URGE = {
+    1: { summary: "A desire for independence, leadership, and autonomy.", application: "Often shows as resisting being managed closely, even when the oversight is well-intended.", reflection: "Where are you tolerating being managed in a way that genuinely frustrates you?", action: "Ask for more autonomy on one specific thing today." },
+    2: { summary: "A deep longing for harmony, peace, and close relationships.", application: "Often shows as avoiding conflict even when something actually needs to be said.", reflection: "What's a disagreement you've been avoiding for the sake of peace?", action: "Say the thing you've been avoiding, calmly, today." },
+    3: { summary: "A need for self-expression, creativity, and joy.", application: "Often shows as feeling flat or restless when there's no creative outlet in the week.", reflection: "When did you last do something purely because it was fun, with no other purpose?", action: "Do one purely enjoyable, non-productive thing today." },
+    4: { summary: "A strong desire for security, stability, and hard work.", application: "Often shows as discomfort with open-ended plans or last-minute changes.", reflection: "Is there a risk you're avoiding purely because it feels unstable, even though it's worth taking?", action: "Take one small, deliberate risk you've been avoiding for safety's sake." },
+    5: { summary: "A yearning for freedom, change, and excitement.", application: "Often shows as feeling boxed in by routine, even a routine that's otherwise working.", reflection: "What commitment feels like it's costing you more freedom than it's worth?", action: "Change one small routine today, on purpose." },
+    6: { summary: "A need to nurture others and focus on family and home life.", application: "Often shows as measuring a good day by whether the people around you were taken care of.", reflection: "When did you last let yourself be taken care of, instead of doing the caretaking?", action: "Let someone do something for you today without deflecting it." },
+    7: { summary: "A deep inner need for solitude, reflection, and spiritual growth.", application: "Often shows as needing real alone time to recover after a lot of social contact.", reflection: "Have you actually protected time for solitude this week, or just hoped it would appear?", action: "Block out real, uninterrupted alone time today." },
+    8: { summary: "A desire for material success, ambition, and leadership.", application: "Often shows as feeling restless or anxious when progress toward a goal stalls.", reflection: "Is your sense of self-worth currently tied to a number, title, or result?", action: "Notice one thing you're proud of today that has nothing to do with achievement." },
+    9: { summary: "A longing to help others and bring about positive change.", application: "Often shows as feeling pulled toward causes or people beyond your own immediate circle.", reflection: "Is there someone close to you who needs the same generosity you give to strangers or causes?", action: "Direct one act of generosity at someone close to you today, not a cause." },
+  };
+  const PERSONALITY = {
+    1: { summary: "Comes across as confident, direct, and self-assured.", application: "Others often assume you have it handled, even on days you don't.", reflection: "Is there a moment lately where you projected more certainty than you actually felt?", action: "Admit uncertainty about one thing to someone today, instead of projecting confidence." },
+    2: { summary: "Comes across as gentle, diplomatic, and easy to approach.", application: "People often bring you their conflicts to help sort out, even uninvited.", reflection: "Do people know what you actually think, or mostly what you think will keep things smooth?", action: "State an honest opinion today, even if it's not the easiest one." },
+    3: { summary: "Comes across as expressive, sociable, and good-humoured.", application: "People often expect you to lighten the mood, even when you don't feel like it.", reflection: "Is there a heavier feeling you've been covering with humor lately?", action: "Let a genuine feeling show today instead of deflecting with a joke." },
+    4: { summary: "Comes across as grounded, reliable, and disciplined.", application: "People often lean on you specifically because you're the dependable one in the group.", reflection: "Is there a time recently you said yes to being 'the reliable one' when you actually needed support yourself?", action: "Ask for help with something today instead of handling it alone." },
+    5: { summary: "Comes across as energetic, adaptable, and magnetic.", application: "People are often drawn to you first in a new group or setting.", reflection: "Does your outward energy sometimes mask how you're actually feeling underneath?", action: "Tell someone close to you how you're actually doing today, past the surface answer." },
+    6: { summary: "Comes across as warm, responsible, and caring.", application: "People often assume you'll naturally step in to help, without being asked.", reflection: "Is there a responsibility people assume you'll take on, that you never actually agreed to?", action: "Say no to one assumed responsibility today." },
+    7: { summary: "Comes across as reserved, thoughtful, and perceptive.", application: "People often read your quietness as having everything figured out.", reflection: "Is there something you're actually unsure about that your reserved exterior is hiding?", action: "Share an unresolved thought with someone today instead of keeping it private." },
+    8: { summary: "Comes across as authoritative, ambitious, and capable.", application: "People often defer to you in group settings, even when you haven't said much.", reflection: "Does your outward capability ever stop people from checking in on how you're really doing?", action: "Let someone see a part of you that isn't 'handling it' today." },
+    9: { summary: "Comes across as compassionate, broad-minded, and idealistic.", application: "People often bring you their bigger-picture worries, expecting empathy and perspective.", reflection: "Who's holding space for your worries, the way you hold space for everyone else's?", action: "Share a genuine worry with someone today instead of only listening to theirs." },
+    11: { summary: "Comes across as intense, perceptive, and quietly magnetic.", application: "People often sense you're perceptive even before you say anything.", reflection: "Do you share what you perceive, or mostly keep it to yourself?", action: "Voice one perceptive observation out loud today." },
+  };
+  const ROOT = {
+    1: { keyword: "Beginnings", summary: "Independence, leadership, originality, new starts.", yearApplication: "A year traditionally suited to starting things, not finishing or maintaining them.", yearReflection: "What have you been waiting for the 'right time' to start?", yearAction: "Begin the thing you've been postponing, even in a small way, this year." },
+    2: { keyword: "Balance", summary: "Cooperation, diplomacy, partnership, sensitivity.", yearApplication: "A year traditionally suited to partnership and patience, not solo pushes.", yearReflection: "Which relationship most needs patience from you this year?", yearAction: "Invest deliberately in one key partnership this year." },
+    3: { keyword: "Expression", summary: "Creativity, communication, self-expression, joy.", yearApplication: "A year traditionally suited to creative output and being seen.", yearReflection: "What have you been creating only in private that's ready to be shared?", yearAction: "Put one creative project out into the world this year." },
+    4: { keyword: "Structure", summary: "Stability, organisation, practicality, hard work.", yearApplication: "A year traditionally suited to steady, unglamorous groundwork.", yearReflection: "What foundation are you building this year that won't pay off until later?", yearAction: "Commit to one disciplined, unglamorous habit for this year." },
+    5: { keyword: "Change", summary: "Freedom, adventure, adaptability, variety.", yearApplication: "A year traditionally suited to change, travel, and breaking routine.", yearReflection: "What's stayed the same for too long and is due to change this year?", yearAction: "Make one deliberate, significant change this year rather than waiting for it to happen to you." },
+    6: { keyword: "Care", summary: "Responsibility, nurturing, harmony, family.", yearApplication: "A year traditionally suited to family, home, and responsibility.", yearReflection: "Which relationship closest to home needs more of your attention this year?", yearAction: "Prioritize one home or family matter you've been deferring this year." },
+    7: { keyword: "Reflection", summary: "Analysis, introspection, spirituality, solitude.", yearApplication: "A year traditionally suited to study, reflection, and going inward.", yearReflection: "What question about your own life have you been too busy to actually sit with?", yearAction: "Set aside real time this year for study or reflection, not just output." },
+    8: { keyword: "Power", summary: "Ambition, authority, material success, achievement.", yearApplication: "A year traditionally suited to ambition, business, and tangible results.", yearReflection: "What ambition have you been underselling or holding back on?", yearAction: "Make one bold, ambitious move this year instead of waiting for permission." },
+    9: { keyword: "Completion", summary: "Compassion, wisdom, humanitarianism, release.", yearApplication: "A year traditionally suited to closing loops before a new cycle begins.", yearReflection: "What's run its course and is ready to be let go of this year?", yearAction: "Deliberately close out one unfinished chapter this year." },
+  };
 
   function openNumberModal(type) {
     const idMap = { lifePath: 'pv-lifepath', expression: 'pv-expression', soulUrge: 'pv-soulurge', personality: 'pv-personality', personalYear: 'pv-personalyear' };
@@ -468,14 +570,17 @@
     const applicationEl = document.getElementById('numinfo-application');
     const reflectionEl = document.getElementById('numinfo-reflection');
     const actionEl = document.getElementById('numinfo-action');
+    const sourceEl = document.getElementById('numinfo-source');
     strengthsEl.innerHTML = ''; weaknessesEl.innerHTML = ''; careerEl.textContent = '';
     calcEl.style.display = 'none'; applicationEl.style.display = 'none';
-    reflectionEl.style.display = 'none'; actionEl.style.display = 'none';
+    reflectionEl.style.display = 'none'; actionEl.style.display = 'none'; sourceEl.style.display = 'none';
 
     if (type === 'lifePath') {
       const d = LIFE_PATH[num];
       document.getElementById('numinfo-title').textContent = 'Life Path ' + num;
       document.getElementById('numinfo-subtitle').textContent = d.title;
+      sourceEl.textContent = 'Calculated from your birthdate';
+      sourceEl.style.display = 'block';
 
       if (window.myLifePathCalculation) {
         const c = window.myLifePathCalculation;
@@ -492,23 +597,47 @@
       if (d.application) { applicationEl.textContent = 'In practice: ' + d.application; applicationEl.style.display = 'block'; }
       if (d.reflection) { reflectionEl.textContent = d.reflection; reflectionEl.style.display = 'block'; }
       if (d.action) { actionEl.textContent = 'Try: ' + d.action; actionEl.style.display = 'block'; }
-    } else if (type === 'expression') {
-      document.getElementById('numinfo-title').textContent = 'Expression ' + num;
-      document.getElementById('numinfo-subtitle').textContent = 'Your natural talent';
-      document.getElementById('numinfo-summary').textContent = EXPRESSION[num] || '';
-    } else if (type === 'soulUrge') {
-      document.getElementById('numinfo-title').textContent = 'Soul Urge ' + num;
-      document.getElementById('numinfo-subtitle').textContent = 'What motivates you inwardly';
-      document.getElementById('numinfo-summary').textContent = SOUL_URGE[num] || '';
-    } else if (type === 'personality') {
-      document.getElementById('numinfo-title').textContent = 'Personality ' + num;
-      document.getElementById('numinfo-subtitle').textContent = 'How others perceive you';
-      document.getElementById('numinfo-summary').textContent = PERSONALITY[num] || '';
+    } else if (type === 'expression' || type === 'soulUrge' || type === 'personality') {
+      const contentMap = { expression: EXPRESSION, soulUrge: SOUL_URGE, personality: PERSONALITY };
+      const calcMap = { expression: window.myExpressionCalculation, soulUrge: window.mySoulUrgeCalculation, personality: window.myPersonalityCalculation };
+      const titleMap = { expression: 'Expression', soulUrge: 'Soul Urge', personality: 'Personality' };
+      const subtitleMap = { expression: 'Your natural talent', soulUrge: 'What motivates you inwardly', personality: 'How others perceive you' };
+
+      const d = contentMap[type][num];
+      document.getElementById('numinfo-title').textContent = titleMap[type] + ' ' + num;
+      document.getElementById('numinfo-subtitle').textContent = subtitleMap[type];
+      sourceEl.textContent = 'Calculated from your full name';
+      sourceEl.style.display = 'block';
+
+      const calc = calcMap[type];
+      if (calc) {
+        const stepLines = calc.reductionSteps.map(s => `${s.expression} = ${s.result}`).join('<br>');
+        calcEl.innerHTML = `${calc.combinedExpression} = ${calc.combinedTotal}<br>${stepLines}`;
+        calcEl.style.display = 'block';
+      }
+
+      document.getElementById('numinfo-summary').textContent = d ? d.summary : '';
+      if (d && d.application) { applicationEl.textContent = 'In practice: ' + d.application; applicationEl.style.display = 'block'; }
+      if (d && d.reflection) { reflectionEl.textContent = d.reflection; reflectionEl.style.display = 'block'; }
+      if (d && d.action) { actionEl.textContent = 'Try: ' + d.action; actionEl.style.display = 'block'; }
     } else if (type === 'personalYear') {
       const d = ROOT[num] || ROOT[reduceTo9(num)];
       document.getElementById('numinfo-title').textContent = 'Personal Year ' + num;
       document.getElementById('numinfo-subtitle').textContent = d.keyword;
+      sourceEl.textContent = "Calculated from your birthdate and this year";
+      sourceEl.style.display = 'block';
+
+      if (window.myPersonalYearCalculation) {
+        const c = window.myPersonalYearCalculation;
+        const stepLines = c.reductionSteps.map(s => `${s.expression} = ${s.result}`).join('<br>');
+        calcEl.innerHTML = `${c.expression} = ${c.total}<br>${stepLines}`;
+        calcEl.style.display = 'block';
+      }
+
       document.getElementById('numinfo-summary').textContent = d.summary;
+      if (d.yearApplication) { applicationEl.textContent = 'In practice: ' + d.yearApplication; applicationEl.style.display = 'block'; }
+      if (d.yearReflection) { reflectionEl.textContent = d.yearReflection; reflectionEl.style.display = 'block'; }
+      if (d.yearAction) { actionEl.textContent = 'Try: ' + d.yearAction; actionEl.style.display = 'block'; }
     }
 
     document.getElementById('numinfo-overlay').classList.add('open');
@@ -575,6 +704,10 @@
     const { numbers, birthdate, numerologySystem, pushOptIn } = await res.json();
     myBirthdate = birthdate;
     window.myLifePathCalculation = numbers.lifePathCalculation || null;
+    window.myExpressionCalculation = numbers.expressionCalculation || null;
+    window.mySoulUrgeCalculation = numbers.soulUrgeCalculation || null;
+    window.myPersonalityCalculation = numbers.personalityCalculation || null;
+    window.myPersonalYearCalculation = numbers.personalYearCalculation || null;
     document.getElementById('system-select').value = numerologySystem || 'pythagorean';
     document.getElementById('push-select').value = pushOptIn ? 'on' : 'off';
     document.getElementById('pv-lifepath').textContent = numbers.lifePath;
@@ -610,6 +743,20 @@
     return reduceToSingleDigit(personalMonth + day);
   }
 
+  // Same formula as getPersonalDayFor(), but also returns the full chain
+  // (Personal Year → Personal Month → Personal Day) for transparent display.
+  function getPersonalDayChain(birthdateStr, year, month, day) {
+    const bd = new Date(birthdateStr);
+    const bDay = bd.getDate();
+    const bMonth = bd.getMonth() + 1;
+    const pyDigits = `${bDay}${bMonth}${year}`.split('');
+    const pyTotal = pyDigits.reduce((a,b) => a + parseInt(b,10), 0);
+    const py = reduceToSingleDigit(pyTotal);
+    const pm = reduceToSingleDigit(py + month);
+    const pd = reduceToSingleDigit(pm + day);
+    return { pyExpr: pyDigits.join(' + '), py, month, pm, pd };
+  }
+
   window.renderCalendar = function renderCalendar() {
     if (!myBirthdate) return;
     const [yearStr, monthStr] = document.getElementById('cal-month').value.split('-');
@@ -624,7 +771,10 @@
       const cell = document.createElement('div');
       cell.className = 'cal-cell';
       cell.innerHTML = `<div class="cal-day">${day}</div><div class="cal-keyword">${KEYWORDS[num]}</div>`;
-      cell.addEventListener('click', () => openDayModal(day, num));
+      cell.addEventListener('click', () => {
+        window.currentCalc = getPersonalDayChain(myBirthdate, year, month, day);
+        openDayModal(day, num);
+      });
       grid.appendChild(cell);
     }
     const remainder = daysInMonth % 6;
@@ -679,12 +829,27 @@
     }
 
     const data = await res.json();
-    const resultText = { 'strong-match': 'Strong match', 'harmonious': 'Harmonious', 'neutral': 'Neutral' }[data.result];
+    const c = COMPAT_CONTENT[data.result];
+    const theirLabel = label || 'Their';
+    const titleA = (LIFE_PATH[data.lifePathA] || {}).title || '';
+    const titleB = (LIFE_PATH[data.lifePathB] || {}).title || '';
+
     resultEl.style.display = 'block';
     resultEl.innerHTML = `
+      <div style="font-size:11px; letter-spacing:0.5px; text-transform:uppercase; color:var(--muted); margin-bottom:10px;">Calculated from both birthdates</div>
+
       <div class="row"><span class="num-label">Your Life Path</span><span class="num-value">${data.lifePathA}</span></div>
-      <div class="row" style="margin-top:6px;"><span class="num-label">${label || 'Their'} Life Path</span><span class="num-value">${data.lifePathB}</span></div>
-      <div class="subtext" style="margin-top:10px;">${resultText}</div>
+      <div class="subtext" style="margin:2px 0 8px;">${titleA}</div>
+      <div style="font-family:monospace; font-size:12px; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:8px 10px; margin-bottom:14px;">${renderLifePathCalc(data.lifePathACalculation)}</div>
+
+      <div class="row"><span class="num-label">${theirLabel} Life Path</span><span class="num-value">${data.lifePathB}</span></div>
+      <div class="subtext" style="margin:2px 0 8px;">${titleB}</div>
+      <div style="font-family:monospace; font-size:12px; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:8px 10px; margin-bottom:14px;">${renderLifePathCalc(data.lifePathBCalculation)}</div>
+
+      <div style="font-weight:700; margin-bottom:6px;">${c.label}</div>
+      <div style="font-size:14px; line-height:1.6; margin-bottom:14px;">${c.explanation}</div>
+      <div style="font-size:14px; line-height:1.6; margin-bottom:14px;">In practice: ${c.communicationTip}</div>
+      <div style="font-style:italic; font-size:14px; line-height:1.6; color:var(--brand);">${c.reflection}</div>
     `;
   };
 
@@ -706,13 +871,32 @@
       return;
     }
 
-    const { rootNumber } = await res.json();
+    const { rootNumber, calculation } = await res.json();
     const info = ROOT[rootNumber];
+    const lc = LOOKUP_CONTENT[rootNumber];
+
+    let calcHtml = '';
+    if (calculation) {
+      const stepLines = calculation.reductionSteps.map(s => `${s.expression} = ${s.result}`).join('<br>');
+      calcHtml = `
+        <div style="font-size:11px; letter-spacing:0.5px; text-transform:uppercase; color:var(--muted); margin:12px 0 6px;">Calculated from the sequence you entered</div>
+        <div style="font-family:monospace; font-size:12px; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:8px 10px; line-height:1.6; word-break:break-all;">
+          ${calculation.input}<br>
+          ${calculation.expression} = ${calculation.total}${stepLines ? '<br>' + stepLines : ''}
+        </div>
+        <div class="subtext" style="margin-top:6px; font-size:12px;">Each digit counts as its own value; letters use the Pythagorean letter chart (A=1 ... I=9, J=1 ...). Spaces and symbols are ignored.</div>`;
+    }
+
     resultEl.style.display = 'block';
     resultEl.innerHTML = `
       <div class="row"><span class="num-label">Root Number</span><span class="num-value">${rootNumber}</span></div>
       <div style="font-weight:700; margin-top:10px;">${info.keyword}</div>
       <div class="subtext" style="margin-top:4px;">${info.summary}</div>
+      ${calcHtml}
+      <div style="font-size:14px; line-height:1.6; margin-top:14px;">${lc.application}</div>
+      <div style="font-style:italic; font-size:14px; line-height:1.6; margin-top:10px; color:var(--brand);">${lc.reflection}</div>
+      <div style="font-size:14px; font-weight:700; margin-top:10px;">Try: ${lc.action}</div>
+      <div class="subtext" style="margin-top:12px; font-size:12px;">This is a symbolic reflection tool. A number appearing in your life isn't evidence of a message or prediction.</div>
     `;
   };
 
