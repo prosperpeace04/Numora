@@ -1,6 +1,6 @@
 import { verifyAuth } from './_lib/verify-auth.js';
 import { sql } from './_lib/db.js';
-import { getRootNumber } from './_lib/calculations.js';
+import { getRootNumber, getRootNumberWithSteps } from './_lib/calculations.js';
 
 // POST /api/lookup
 // Body: { value: string, label?: string }
@@ -25,6 +25,14 @@ export default async function handler(req, res) {
 
   const rootNumber = getRootNumber(value);
 
+  // Calculation steps for the transparent breakdown. Only attached when
+  // they agree with the number above, same safety pattern used elsewhere.
+  const withSteps = getRootNumberWithSteps(value);
+  const calculation = withSteps.number === rootNumber ? withSteps.calculation : undefined;
+  if (!calculation) {
+    console.error('Root number step mismatch:', withSteps.number, 'vs', rootNumber);
+  }
+
   try {
     await sql`
       INSERT INTO number_lookups (user_id, input_value, root_number, label)
@@ -37,7 +45,7 @@ export default async function handler(req, res) {
       VALUES (${authUser.userId}, 'lookup')
     `;
 
-    return res.status(200).json({ rootNumber });
+    return res.status(200).json({ rootNumber, calculation });
   } catch (error) {
     console.error('lookup error:', error);
     return res.status(500).json({ error: 'Failed to save lookup' });
