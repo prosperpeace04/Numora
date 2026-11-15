@@ -25,6 +25,12 @@ export default async function handler(req, res) {
 
   const rootNumber = getRootNumber(value);
 
+  // A sequence that adds up to 0 (for example just zeros or symbols) has no
+  // root number from 1 to 9, so there is nothing meaningful to read or save.
+  if (rootNumber === 0) {
+    return res.status(400).json({ error: 'That has no countable digits or letters. Try a number or word that adds up to something.' });
+  }
+
   // Calculation steps for the transparent breakdown. Only attached when
   // they agree with the number above, same safety pattern used elsewhere.
   const withSteps = getRootNumberWithSteps(value);
