@@ -10,6 +10,7 @@ import {
   calculateDestinyNumber as calculateDestinyWithSteps,
   calculateSoulUrgeNumber as calculateSoulUrgeWithSteps,
   calculatePersonalityNumber as calculatePersonalityWithSteps,
+  calculateBirthdayRoot as calculateBirthdayRootWithSteps,
 } from './numora-pythagorean-engine.js';
 // ^ supplied engine (user-provided, sourced from the Numerology Name
 // Calculator Handbook), verified against its own worked examples AND
@@ -245,6 +246,137 @@ export function getRootNumberWithSteps(input) {
   };
 }
 
+// ---- Extra number details: Birth Day, Attitude, Maturity, Personal Month,
+// Pinnacles and Challenges. Each one reuses the already-verified number and
+// only attaches the working (display lines) when the recomputed value agrees.
+
+function reduceWithStepsKeepMaster(num) {
+  const steps = [];
+  while (num > 9 && ![11, 22, 33].includes(num)) {
+    const digits = String(num).split('');
+    const next = digits.reduce((sum, d) => sum + parseInt(d, 10), 0);
+    steps.push({ expression: digits.join(' + '), result: next });
+    num = next;
+  }
+  return { value: num, steps };
+}
+
+// "a + b = total", then one line per reduction step.
+function sumLines(parts, keepMaster) {
+  const total = parts.reduce((a, b) => a + b, 0);
+  const r = keepMaster ? reduceWithStepsKeepMaster(total) : reduceToSingleDigitWithSteps(total);
+  const lines = [`${parts.join(' + ')} = ${total}`];
+  for (const step of r.steps) lines.push(`${step.expression} = ${step.result}`);
+  return { value: r.value, lines };
+}
+
+// Reduces one date part (day, month or year) to a single digit, with its working.
+function componentLine(label, value) {
+  const { value: reduced, steps } = reduceToSingleDigitWithSteps(value);
+  if (steps.length === 0) return { reduced, line: `${label} ${value}` };
+  const chain = steps.map((st) => `${st.expression} = ${st.result}`).join(', then ');
+  return { reduced, line: `${label} ${value}: ${chain}` };
+}
+
+function attachExtraNumberDetails(profile, birthdate, currentDate) {
+  const day = birthdate.getDate();
+  const month = birthdate.getMonth() + 1;
+  const year = birthdate.getFullYear();
+
+  // Birth Day: handbook convention, the day of the month reduced to 1-9
+  // (so day 11 gives 2, day 29 gives 2). No master numbers here.
+  const bd = calculateBirthdayRootWithSteps({ year, month, day });
+  if (bd.number === reduceToSingleDigit(day)) {
+    profile.birthDay = bd.number;
+    profile.birthDayCalculation = {
+      lines: [`Birth day: ${day}`, ...bd.calculation.reductionSteps.map((st) => `${st.expression} = ${st.result}`)],
+    };
+  } else {
+    console.error('Birth Day engine mismatch:', bd.number, 'vs', reduceToSingleDigit(day));
+  }
+
+  // Attitude: day + month, master numbers kept (Numora's own convention)
+  const att = sumLines([day, month], true);
+  if (att.value === profile.attitude) {
+    profile.attitudeCalculation = { lines: att.lines };
+  } else {
+    console.error('Attitude step mismatch:', att.value, 'vs', profile.attitude);
+  }
+
+  // Maturity: Life Path + Expression, master numbers kept (needs a full name)
+  if (profile.maturity !== undefined) {
+    const mat = sumLines([profile.lifePath, profile.expression], true);
+    if (mat.value === profile.maturity) {
+      profile.maturityCalculation = { lines: mat.lines };
+    } else {
+      console.error('Maturity step mismatch:', mat.value, 'vs', profile.maturity);
+    }
+  }
+
+  // Personal Month: Personal Year + the current month, reduced to 1-9
+  const monthNow = currentDate.getMonth() + 1;
+  const pmTotal = profile.personalYear + monthNow;
+  const pm = reduceToSingleDigitWithSteps(pmTotal);
+  if (pm.value === profile.personalMonth) {
+    profile.personalMonthCalculation = {
+      lines: [`Personal Year ${profile.personalYear} + month ${monthNow} = ${pmTotal}`, ...pm.steps.map((st) => `${st.expression} = ${st.result}`)],
+    };
+  } else {
+    console.error('Personal Month step mismatch:', pm.value, 'vs', profile.personalMonth);
+  }
+
+  // Pinnacles and Challenges share the same three reduced date parts
+  const dPart = componentLine('Day', day);
+  const mPart = componentLine('Month', month);
+  const yPart = componentLine('Year', year);
+  const d = dPart.reduced, m = mPart.reduced, y = yPart.reduced;
+  const componentLines = [mPart.line, dPart.line, yPart.line];
+
+  const lpReduced = profile.lifePath > 9 ? reduceToSingleDigit(profile.lifePath) : profile.lifePath;
+  const firstEnd = 36 - lpReduced;
+
+  let age = currentDate.getFullYear() - year;
+  const birthdayPassed = monthNow > month || (monthNow === month && currentDate.getDate() >= day);
+  if (!birthdayPassed) age -= 1;
+
+  const p1 = sumLines([m, d], true);
+  const p2 = sumLines([d, y], true);
+  const p3 = sumLines([p1.value, p2.value], true);
+  const p4 = sumLines([m, y], true);
+  const pCalcs = [p1, p2, p3, p4];
+  if (pCalcs.every((c, i) => c.value === profile.pinnacles[i].number)) {
+    const stages = profile.pinnacles.map((p, i) => ({ ...p, lines: pCalcs[i].lines }));
+    profile.pinnacleDetails = {
+      componentLines,
+      ageLine: `Stage 1 ends at 36 - Life Path ${lpReduced} = ${firstEnd}`,
+      age,
+      currentIndex: stages.findIndex((st) => age >= st.startAge && (st.endAge === null || age <= st.endAge)),
+      stages,
+    };
+  } else {
+    console.error('Pinnacle step mismatch');
+  }
+
+  const c1 = Math.abs(m - d);
+  const c2 = Math.abs(d - y);
+  const c3 = Math.abs(c1 - c2);
+  const c4 = Math.abs(m - y);
+  const cNums = [c1, c2, c3, c4];
+  if (cNums.every((n, i) => n === profile.challenges[i])) {
+    profile.challengeDetails = {
+      componentLines,
+      stages: [
+        { number: c1, lines: [`|${m} - ${d}| = ${c1}`] },
+        { number: c2, lines: [`|${d} - ${y}| = ${c2}`] },
+        { number: c3, lines: [`|${c1} - ${c2}| = ${c3}`] },
+        { number: c4, lines: [`|${m} - ${y}| = ${c4}`] },
+      ],
+    };
+  } else {
+    console.error('Challenge step mismatch');
+  }
+}
+
 export function getFullProfile(birthdate, fullName = null, currentDate = new Date(), system = 'pythagorean') {
   // Transparent calculation steps for the Life Path deep reading. Computed
   // separately from (and cross-checked against) the lifePath number above —
@@ -316,6 +448,7 @@ export function getFullProfile(birthdate, fullName = null, currentDate = new Dat
       }
     }
   }
+  attachExtraNumberDetails(profile, birthdate, currentDate);
   return profile;
 }
 
