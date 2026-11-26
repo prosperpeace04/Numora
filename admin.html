@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Numora — Admin</title>
+<title>Numora Admin</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap');
   :root {
@@ -31,7 +31,39 @@
   .color-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
   .color-row label { flex:1; font-size:13px; }
   .color-row input[type=color] { width:44px; height:36px; padding:2px; margin:0; }
-  .hidden { display:none; }
+  .hidden { display:none !important; }
+  .head-row { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .head-row > div { flex:1; min-width:0; }
+  button.action.refresh-btn { width:auto; padding:9px 16px; font-size:13px; flex-shrink:0; margin-bottom:0; }
+  .stat-card { display:block; width:100%; text-align:left; color:inherit; font:inherit; margin-bottom:0; cursor:pointer; }
+  .stat-card.static { cursor:default; }
+  .stat-card:not(.static):active { transform:scale(.98); }
+  .stat-card.alert { border-color:var(--brand); box-shadow:0 0 0 1px var(--brand); }
+  .stat-hint { font-size:11px; color:var(--muted); margin-top:4px; }
+  .note { font-size:12px; color:var(--muted); margin:-4px 0 14px; }
+  .error-text { color:#C44; font-size:13px; margin-bottom:12px; }
+  .overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:flex-end; justify-content:center; z-index:20; }
+  .sheet { width:100%; max-width:520px; max-height:90vh; overflow-y:auto; background:var(--card); border:1px solid var(--border); border-radius:18px 18px 0 0; padding:18px; }
+  .sheet-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:10px; }
+  .sheet-title { font-weight:700; font-size:18px; }
+  .chip-btn { padding:8px 14px; border-radius:999px; border:1px solid var(--border); background:var(--bg); color:var(--text); cursor:pointer; font-size:13px; }
+  .chips { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+  .chips .chip-btn.on { background:var(--brand); border-color:var(--brand); color:#fff; }
+  .user-row { display:flex; justify-content:space-between; align-items:center; gap:10px; width:100%; text-align:left; color:inherit; font:inherit; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:8px; cursor:pointer; }
+  .user-row:active { transform:scale(.99); }
+  .user-main { min-width:0; }
+  .user-name { font-weight:700; overflow-wrap:anywhere; }
+  .user-sub { font-size:12px; color:var(--muted); overflow-wrap:anywhere; }
+  .user-meta { text-align:right; flex-shrink:0; }
+  .badge { display:inline-block; font-size:11px; border-radius:999px; padding:2px 8px; margin-bottom:3px; border:1px solid var(--border); color:var(--muted); }
+  .badge.warn { border-color:var(--brand); color:var(--brand); font-weight:700; }
+  .kv { display:flex; justify-content:space-between; gap:14px; padding:9px 0; border-bottom:1px solid var(--border); font-size:14px; }
+  .kv span:first-child { color:var(--muted); flex-shrink:0; }
+  .kv span:last-child { text-align:right; overflow-wrap:anywhere; }
+  .callout { background:var(--bg); border:1px solid var(--brand); border-radius:10px; padding:12px 14px; font-size:13px; line-height:1.5; margin:12px 0; }
+  .btn-row { display:flex; gap:10px; margin-top:14px; }
+  .btn-row .action, .btn-row a.action { flex:1; text-align:center; text-decoration:none; display:block; box-sizing:border-box; padding:12px; border-radius:8px; border:none; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; background:var(--brand); color:#fff; margin:0; }
+  .btn-row .action.secondary { background:var(--bg); color:var(--text); border:1px solid var(--border); }
   #status { font-size:13px; color:var(--muted); margin-top:8px; }
 </style>
 </head>
@@ -48,23 +80,30 @@
   </div>
 
   <div id="dashboard" class="hidden">
-    <h1>Numora Admin</h1>
-    <div class="subtext">App overview</div>
+    <div class="head-row">
+      <div>
+        <h1>Numora Admin</h1>
+        <div class="subtext" style="margin-bottom:14px;">Tap a number to see the people behind it. <span id="updated"></span></div>
+      </div>
+      <button class="action refresh-btn" onclick="refreshAll()">Refresh</button>
+    </div>
+    <div id="stats-error" class="error-text"></div>
 
     <div class="stat-grid">
-      <div class="card"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Total Users</div></div>
-      <div class="card"><div class="stat-num" id="stat-active">—</div><div class="stat-label">Active (7d)</div></div>
-      <div class="card"><div class="stat-num" id="stat-lookups">—</div><div class="stat-label">Total Lookups</div></div>
-      <div class="card"><div class="stat-num" id="stat-errors">See Vercel</div><div class="stat-label">Errors</div></div>
+      <button class="card stat-card" onclick="openList('all')"><div class="stat-num" id="stat-total">-</div><div class="stat-label">Total Users</div><div class="stat-hint">Tap to see everyone</div></button>
+      <button class="card stat-card" onclick="openList('active')"><div class="stat-num" id="stat-active">-</div><div class="stat-label">Active (7d)</div><div class="stat-hint">Tap to see who</div></button>
+      <button class="card stat-card" id="card-incomplete" onclick="openList('incomplete')"><div class="stat-num" id="stat-incomplete">-</div><div class="stat-label">Incomplete sign-ups</div><div class="stat-hint">Account, but no profile</div></button>
+      <div class="card stat-card static"><div class="stat-num" id="stat-lookups">-</div><div class="stat-label">Total Lookups</div></div>
     </div>
+    <div class="note" id="accounts-note"></div>
 
     <div class="card">
-      <div style="font-weight:700; margin-bottom:10px;">Signups — last 14 days</div>
+      <div style="font-weight:700; margin-bottom:10px;">Signups, last 14 days</div>
       <div id="chart-signups"></div>
     </div>
 
     <div class="card">
-      <div style="font-weight:700; margin-bottom:10px;">Lookups — last 14 days</div>
+      <div style="font-weight:700; margin-bottom:10px;">Lookups, last 14 days</div>
       <div id="chart-lookups"></div>
     </div>
 
@@ -73,6 +112,25 @@
       <div class="subtext" style="margin-bottom:12px;">Changes apply live to the app on next page load.</div>
       <div id="color-editor"></div>
       <div id="status"></div>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="list-overlay" onclick="if(event.target===this) closeList()">
+    <div class="sheet">
+      <div class="sheet-head"><div class="sheet-title" id="list-title"></div><button class="chip-btn" onclick="closeList()">Close</button></div>
+      <div class="chips" id="list-chips">
+        <button class="chip-btn" data-filter="all" onclick="openList('all')">All</button>
+        <button class="chip-btn" data-filter="active" onclick="openList('active')">Active</button>
+        <button class="chip-btn" data-filter="incomplete" onclick="openList('incomplete')">Incomplete</button>
+      </div>
+      <div id="list-body"></div>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="user-overlay" style="z-index:30;" onclick="if(event.target===this) closeUser()">
+    <div class="sheet">
+      <div class="sheet-head"><div class="sheet-title">Person</div><button class="chip-btn" onclick="closeUser()">Back</button></div>
+      <div id="user-body"></div>
     </div>
   </div>
 
@@ -126,16 +184,157 @@
     });
   }
 
+  function escapeHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '-';
+    const d = new Date(iso);
+    return isNaN(d) ? '-' : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function timeAgo(iso) {
+    if (!iso) return 'Never';
+    const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+    if (isNaN(mins)) return '-';
+    if (mins < 2) return 'Just now';
+    if (mins < 60) return mins + ' minutes ago';
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return hrs + (hrs === 1 ? ' hour ago' : ' hours ago');
+    const days = Math.round(hrs / 24);
+    return days + (days === 1 ? ' day ago' : ' days ago');
+  }
+
   async function loadStats() {
-    const res = await fetch('/api/stats', { headers: { 'X-Admin-Password': adminPassword } });
-    if (!res.ok) return;
+    const errEl = document.getElementById('stats-error');
+    let res;
+    try {
+      res = await fetch('/api/stats', { headers: { 'X-Admin-Password': adminPassword } });
+    } catch (err) {
+      errEl.textContent = 'Network error: ' + err.message;
+      return;
+    }
+    if (!res.ok) {
+      errEl.textContent = 'Could not load stats (error ' + res.status + '): ' + (await res.text()).slice(0, 200);
+      return;
+    }
+    errEl.textContent = '';
     const data = await res.json();
-    document.getElementById('stat-total').textContent = data.totalUsers;
+    const accountsKnown = data.totalAccounts !== null && data.totalAccounts !== undefined;
+    document.getElementById('stat-total').textContent = accountsKnown ? data.totalAccounts : data.totalUsers;
     document.getElementById('stat-active').textContent = data.activeUsers;
+    document.getElementById('stat-incomplete').textContent = accountsKnown ? data.incompleteSignups : '?';
     document.getElementById('stat-lookups').textContent = data.totalLookups;
+    document.getElementById('card-incomplete').classList.toggle('alert', accountsKnown && data.incompleteSignups > 0);
+    document.getElementById('accounts-note').textContent = accountsKnown
+      ? 'Total Users counts every account, including people who never finished setting up.'
+      : 'Could not read the sign-up accounts table, so these counts only include people who finished setup.';
+    document.getElementById('updated').textContent = 'Updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '.';
     renderBars('chart-signups', data.signupsByDay);
     renderBars('chart-lookups', data.lookupsByDay);
   }
+
+  // ---- people lists ----
+  let currentFilter = null;
+  const FILTER_TITLES = { all: 'Everyone', active: 'Active in the last 7 days', incomplete: 'Incomplete sign-ups' };
+
+  async function openList(filter) {
+    currentFilter = filter;
+    document.getElementById('list-overlay').classList.remove('hidden');
+    document.getElementById('list-title').textContent = FILTER_TITLES[filter];
+    document.querySelectorAll('#list-chips .chip-btn').forEach(b => b.classList.toggle('on', b.dataset.filter === filter));
+    const body = document.getElementById('list-body');
+    body.innerHTML = '<div class="subtext">Loading...</div>';
+    let res;
+    try {
+      res = await fetch('/api/users?filter=' + filter, { headers: { 'X-Admin-Password': adminPassword } });
+    } catch (err) {
+      body.innerHTML = '<div class="error-text">Network error: ' + escapeHtml(err.message) + '</div>';
+      return;
+    }
+    if (filter !== currentFilter) return; // a newer tap replaced this one
+    if (!res.ok) {
+      let msg = 'Error ' + res.status;
+      try { msg = (await res.json()).error || msg; } catch (e) {}
+      body.innerHTML = '<div class="error-text">' + escapeHtml(msg) + '</div>';
+      return;
+    }
+    const { users } = await res.json();
+    if (!users.length) {
+      body.innerHTML = '<div class="subtext">' + (filter === 'incomplete' ? 'Nobody is stuck right now.' : 'Nobody here yet.') + '</div>';
+      return;
+    }
+    body.innerHTML = users.map(u => {
+      const badges = [];
+      if (u.email_verified === false) badges.push('<div class="badge">Not verified</div>');
+      if (!u.has_profile) badges.push('<div class="badge warn">No profile</div>');
+      if (u.has_profile && u.email_verified !== false) badges.push('<div class="badge">Complete</div>');
+      const main = u.username || u.email || 'Unknown';
+      const sub = u.username ? u.email : 'Account only, never finished setup';
+      const when = filter === 'active' ? 'Active ' + timeAgo(u.last_active_at) : 'Joined ' + fmtDate(u.joined);
+      return '<button class="user-row" data-id="' + escapeHtml(u.id) + '"><div class="user-main"><div class="user-name">' + escapeHtml(main) +
+        '</div><div class="user-sub">' + escapeHtml(sub) + '</div></div><div class="user-meta">' + badges.join('') +
+        '<div class="user-sub">' + escapeHtml(when) + '</div></div></button>';
+    }).join('');
+  }
+  document.getElementById('list-body').addEventListener('click', (e) => {
+    const row = e.target.closest('.user-row');
+    if (row) openUser(row.dataset.id);
+  });
+  function closeList() { currentFilter = null; document.getElementById('list-overlay').classList.add('hidden'); }
+
+  async function openUser(id) {
+    document.getElementById('user-overlay').classList.remove('hidden');
+    const body = document.getElementById('user-body');
+    body.innerHTML = '<div class="subtext">Loading...</div>';
+    let res;
+    try {
+      res = await fetch('/api/users?id=' + encodeURIComponent(id), { headers: { 'X-Admin-Password': adminPassword } });
+    } catch (err) {
+      body.innerHTML = '<div class="error-text">Network error: ' + escapeHtml(err.message) + '</div>';
+      return;
+    }
+    if (!res.ok) {
+      let msg = 'Error ' + res.status;
+      try { msg = (await res.json()).error || msg; } catch (e) {}
+      body.innerHTML = '<div class="error-text">' + escapeHtml(msg) + '</div>';
+      return;
+    }
+    const { user: u } = await res.json();
+    const row = (k, v) => '<div class="kv"><span>' + k + '</span><span>' + escapeHtml(v) + '</span></div>';
+    const subject = encodeURIComponent('Numora: finishing your sign-up');
+    const mailBody = encodeURIComponent('Hello,\n\nI saw that you created a Numora account but may not have been able to get in. I am sorry about that. Could you tell me what phone and browser you are using, and what you saw after signing in? I will help you get set up.\n\nThank you.');
+    body.innerHTML =
+      (u.has_profile ? '' : '<div class="callout">This person created an account but never finished setup. After signing in they most likely saw an empty or loading screen. You can email them to help.</div>') +
+      row('Email', u.email) +
+      row('Email verified', u.email_verified ? 'Yes' : 'No') +
+      row('Profile', u.has_profile ? 'Complete' : 'Not created') +
+      row('Username', u.username || '-') +
+      row('Full name', u.full_name || '-') +
+      row('Birthdate', u.birthdate ? fmtDate(u.birthdate) : '-') +
+      row('Joined', fmtDate(u.joined) + ' (' + timeAgo(u.joined) + ')') +
+      row('Last active', timeAgo(u.last_active_at)) +
+      row('Numbers checked', u.lookup_count) +
+      row('Numerology system', u.numerology_system || '-') +
+      row('Monthly notifications', u.push_opt_in ? 'On' : 'Off') +
+      '<div class="btn-row"><a class="action" href="mailto:' + escapeHtml(u.email) + '?subject=' + subject + '&body=' + mailBody + '">Email them</a>' +
+      '<button class="action secondary" id="copy-email">Copy email</button></div>';
+    document.getElementById('copy-email').addEventListener('click', async (e) => {
+      try { await navigator.clipboard.writeText(u.email); e.target.textContent = 'Copied'; }
+      catch (err) { e.target.textContent = u.email; }
+    });
+  }
+  function closeUser() { document.getElementById('user-overlay').classList.add('hidden'); }
+
+  function refreshAll() {
+    loadStats();
+    if (currentFilter) openList(currentFilter);
+  }
+  // keep the numbers fresh without tapping anything
+  setInterval(() => {
+    if (!document.hidden && adminPassword) loadStats();
+  }, 60000);
 
   const COLOR_KEYS = [
     ['brand_light', 'Brand (Light)'], ['brand_dark', 'Brand (Dark)'],
@@ -162,7 +361,7 @@
 
   async function updateColor(key, value) {
     const statusEl = document.getElementById('status');
-    statusEl.textContent = 'Saving…';
+    statusEl.textContent = 'Saving...';
     const res = await fetch('/api/config', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },

@@ -411,7 +411,17 @@ input[type="file"]::file-selector-button:active { transform: translateY(3px); bo
   <div class="screen active" id="screen-profile">
     <h1>Your Numbers</h1>
     <div class="subtext">Calculated from your birthdate and name</div>
-    <div id="profile-loading" class="subtext">Loading your numbers…</div>
+    <div id="profile-loading" class="subtext">Loading your numbers...</div>
+    <div id="profile-retry" style="display:none;"><button class="action" onclick="loadProfile()">Try again</button></div>
+    <div id="finish-setup" class="card" style="display:none;">
+      <div style="font-family:var(--display); font-size:22px; font-weight:700; margin-bottom:4px;">Finish setting up</div>
+      <div id="finish-setup-note" class="subtext" style="margin-bottom:12px;">Your account is ready. We just need a few details to work out your numbers.</div>
+      <input type="text" id="fs-username" placeholder="Username" maxlength="30" autocomplete="username">
+      <input type="text" id="fs-fullname" placeholder="Full name (for your numbers)" maxlength="80" autocomplete="name">
+      <input type="date" id="fs-birthdate">
+      <button class="action" onclick="saveProfileSetup()">Save and continue</button>
+      <div class="subtext" id="fs-error" style="color:#C44; margin:6px 0 0;"></div>
+    </div>
     <div id="profile-cards" style="display:none;">
       <div class="card row tappable" onclick="openNumberModal('lifePath')"><span class="num-label">Life Path</span><span class="num-value" id="pv-lifepath">-</span></div>
       <div class="card row tappable" onclick="openNumberModal('expression')"><span class="num-label">Expression</span><span class="num-value" id="pv-expression">-</span></div>
@@ -552,6 +562,12 @@ input[type="file"]::file-selector-button:active { transform: translateY(3px); bo
       <div id="compat-result" style="display:none; margin-top:10px;"></div>
       <button class="close-btn" onclick="closeCompat()">Close</button>
     </div>
+  </div>
+
+  <div id="signin-banner" class="card" style="display:none; position:fixed; left:14px; right:14px; top:calc(env(safe-area-inset-top, 0px) + 76px); z-index:15; background:var(--bg);">
+    <div style="font-weight:700; margin-bottom:4px;">We couldn't confirm your sign-in</div>
+    <div class="subtext" style="margin-bottom:10px;">Your session may have ended, or this browser may be blocking the sign-in cookie. Sign in again. If it keeps happening, try Chrome, or allow cookies from other sites for this page.</div>
+    <button class="action" style="margin-bottom:0;" onclick="window.location.href='/auth.html'">Sign in again</button>
   </div>
 
   <div class="nav">
@@ -1063,29 +1079,105 @@ input[type="file"]::file-selector-button:active { transform: translateY(3px); bo
 <script type="module">
   import { auth } from '/src/auth-client.js';
 
+  function showSignInProblem() {
+    document.getElementById('signin-banner').style.display = 'block';
+    document.getElementById('profile-loading').textContent = 'Sign in needed to see your numbers.';
+    document.getElementById('cal-loading').textContent = 'Sign in needed.';
+    document.getElementById('more-loading').textContent = 'Sign in needed to see your numbers.';
+  }
+
   async function authedFetch(url, options = {}) {
-    const { data } = await auth.token();
-    if (!data?.token) {
+    let token = null;
+    try {
+      const { data } = await auth.token();
+      token = data && data.token;
+    } catch (err) {
+      // auth.token() throws when there is no usable session, for example when
+      // a browser blocks the sign-in cookie. This used to be unhandled, so the
+      // page sat on "Loading" forever with no message and no way out.
+      console.error('Could not get a sign-in token:', err);
+      showSignInProblem();
+      return null;
+    }
+    if (!token) {
       window.location.href = '/auth.html';
       return null;
     }
-    return fetch(url, {
-      ...options,
-      headers: {
-        ...(options.headers || {}),
-        Authorization: `Bearer ${data.token}`,
-      },
-    });
+    try {
+      return await fetch(url, {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (err) {
+      console.error('Network error:', err);
+      return { ok: false, status: 0 };   // callers already handle a failed response
+    }
   }
 
   let myBirthdate = null;
   window.myLifePathCalculation = null; // exposed on window — this module's own scope isn't visible to the plain, non-module script block that reads it in openNumberModal()
 
-  async function loadProfile() {
-    const res = await authedFetch('/api/profile');
+  function showFinishSetup() {
+    document.getElementById('profile-loading').style.display = 'none';
+    document.getElementById('profile-retry').style.display = 'none';
+    document.getElementById('finish-setup').style.display = 'block';
+    document.getElementById('cal-loading').textContent = 'Finish setting up on the Profile tab first.';
+    document.getElementById('more-loading').textContent = 'Finish setting up on the Profile tab first.';
+    try {
+      // details typed at sign-up are kept on this phone, so offer them back
+      const pending = JSON.parse(localStorage.getItem('numora_pending_profile') || '{}');
+      if (pending.username) {
+        document.getElementById('fs-username').value = pending.username || '';
+        document.getElementById('fs-fullname').value = pending.fullname || '';
+        document.getElementById('fs-birthdate').value = pending.birthdate || '';
+        document.getElementById('finish-setup-note').textContent = 'We kept the details you entered when signing up. Check them and tap Save.';
+      }
+    } catch (e) { /* nothing kept, the form simply starts empty */ }
+  }
+
+  window.saveProfileSetup = async function () {
+    const errEl = document.getElementById('fs-error');
+    errEl.textContent = '';
+    const username = document.getElementById('fs-username').value.trim();
+    const fullName = document.getElementById('fs-fullname').value.trim();
+    const birthdate = document.getElementById('fs-birthdate').value;
+    if (!username || !birthdate) {
+      errEl.textContent = 'Username and birthdate are required.';
+      return;
+    }
+    const res = await authedFetch('/api/create-profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, fullName, birthdate }),
+    });
     if (!res) return;
     if (!res.ok) {
-      document.getElementById('profile-loading').textContent = 'Could not load your numbers.';
+      errEl.textContent = 'Could not save. The username may already be taken, so try a different one.';
+      return;
+    }
+    localStorage.removeItem('numora_pending_profile');
+    document.getElementById('finish-setup').style.display = 'none';
+    document.getElementById('profile-loading').style.display = 'block';
+    document.getElementById('profile-loading').textContent = 'Loading your numbers...';
+    loadProfile();
+    loadProfilePicture();
+  };
+
+  async function loadProfile() {
+    document.getElementById('profile-retry').style.display = 'none';
+    const res = await authedFetch('/api/profile');
+    if (!res) return;
+    if (res.status === 404) {
+      // signed in, but no profile was ever saved: let them finish setting up
+      showFinishSetup();
+      return;
+    }
+    if (!res.ok) {
+      document.getElementById('profile-loading').textContent = 'We could not load your numbers. Check your connection and try again.';
+      document.getElementById('profile-retry').style.display = 'block';
       return;
     }
     const { numbers, birthdate, numerologySystem, pushOptIn } = await res.json();
@@ -1293,6 +1385,8 @@ input[type="file"]::file-selector-button:active { transform: translateY(3px); bo
       <div class="subtext" style="margin-top:12px; font-size:12px;">This is a symbolic reflection tool. A number appearing in your life isn't evidence of a message or prediction.</div>
     `;
   };
+
+  window.loadProfile = loadProfile;
 
   window.updateSystem = async function (value) {
     const res = await authedFetch('/api/profile', {
