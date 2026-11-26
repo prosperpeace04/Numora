@@ -49,7 +49,7 @@ window.submitAuth = async function () {
 
     // Stash so the verify step (below) can call /api/create-profile once
     // the email is confirmed.
-    sessionStorage.setItem('numora_pending_profile', JSON.stringify({
+    localStorage.setItem('numora_pending_profile', JSON.stringify({
       username, fullname, birthdate, email,
     }));
 
@@ -94,17 +94,16 @@ window.submitOtp = async function () {
     return;
   }
 
-  // Now that the email is verified (and the user is signed in), finish the
-  // sign-up by saving username/fullname/birthdate to our own users table —
-  // this closes the TODO from submitAuth() above, via /api/create-profile.
-  const pending = JSON.parse(sessionStorage.getItem('numora_pending_profile') || '{}');
-
-  // Verified against Neon's documented authClient.token() pattern:
-  // https://neon.com/docs/auth/guides/plugins/jwt
-  const { data: tokenData } = await auth.token();
-
-  if (tokenData?.token && pending.username) {
-    try {
+  // The email is verified. Try to save the profile (username, name, birthdate)
+  // now. If anything here fails, that is fine: the dashboard notices a missing
+  // profile and shows a "Finish setting up" form, pre-filled from the details
+  // kept on this phone, so nobody is left on a dead end.
+  const pending = JSON.parse(localStorage.getItem('numora_pending_profile') || '{}');
+  try {
+    // Verified against Neon's documented authClient.token() pattern:
+    // https://neon.com/docs/auth/guides/plugins/jwt
+    const { data: tokenData } = await auth.token();
+    if (tokenData?.token && pending.username) {
       const res = await fetch('/api/create-profile', {
         method: 'POST',
         headers: {
@@ -117,19 +116,14 @@ window.submitOtp = async function () {
           birthdate: pending.birthdate,
         }),
       });
-
-      if (!res.ok) {
+      if (res.ok) {
+        localStorage.removeItem('numora_pending_profile');
+      } else {
         console.error('create-profile failed:', await res.text());
-        errorEl.textContent = 'Signed in, but saving your profile details failed. You can retry from Account settings.';
-        return;
       }
-
-      sessionStorage.removeItem('numora_pending_profile');
-    } catch (err) {
-      console.error('create-profile request error:', err);
-      errorEl.textContent = 'Signed in, but saving your profile details failed. You can retry from Account settings.';
-      return;
     }
+  } catch (err) {
+    console.error('Could not save the profile right now:', err);
   }
 
   window.location.href = '/numora-dashboard.html';
