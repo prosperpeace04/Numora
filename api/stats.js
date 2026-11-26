@@ -40,7 +40,26 @@ export default async function handler(req, res) {
       ORDER BY day
     `;
 
+    // Everyone who created an account with Neon Auth, including people who
+    // never finished setup (no row in our users table). Read separately so the
+    // rest of the stats still load even if this table cannot be read.
+    let totalAccounts = null;
+    let incompleteSignups = null;
+    try {
+      const [accounts] = await sql`SELECT COUNT(*)::int AS count FROM neon_auth."user"`;
+      const [incomplete] = await sql`
+        SELECT COUNT(*)::int AS count FROM neon_auth."user" a
+        WHERE NOT EXISTS (SELECT 1 FROM users p WHERE p.id = a.id)
+      `;
+      totalAccounts = accounts.count;
+      incompleteSignups = incomplete.count;
+    } catch (error) {
+      console.error('stats: could not read neon_auth.user:', error);
+    }
+
     return res.status(200).json({
+      totalAccounts,
+      incompleteSignups,
       totalUsers: totalUsersRow.count,
       activeUsers: activeUsersRow.count,
       totalLookups: totalLookupsRow.count,
